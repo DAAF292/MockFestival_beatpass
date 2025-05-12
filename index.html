@@ -13,6 +13,7 @@
     <link href="https://unpkg.com/aos@next/dist/aos.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/basiclightbox@5.0.4/dist/basicLightbox.min.css" rel="stylesheet">
     <script>document.documentElement.classList.replace('no-js', 'js');</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" defer></script>
 </head>
 <body class="loading" data-theme="light">
     <div id="loader">
@@ -262,8 +263,56 @@
         </div>
     </footer>
 
+    <div id="purchase-modal" class="purchase-modal" style="display: none;">
+        <div class="purchase-modal-content">
+            <button id="modal-close-button" class="modal-close-button" aria-label="Cerrar modal">&times;</button>
+            <h3 id="modal-ticket-name-title" class="modal-title">Comprar Entradas</h3>
+            
+            <div id="modal-form-area">
+                <p class="ticket-info">Tipo de Entrada: <strong id="modal-selected-ticket-name"></strong></p>
+                <p class="ticket-info">Precio Unitario: <strong id="modal-selected-ticket-price"></strong> €</p>
+                
+                <form id="modal-payment-form" class="payment-form">
+                    <div class="form-group">
+                        <label for="modal-ticket-quantity" class="form-label">Cantidad:</label>
+                        <input type="number" id="modal-ticket-quantity" name="cantidad" value="1" min="1" class="form-input" required>
+                    </div>
+
+                    <p class="total-price-info">Precio Total: <strong id="modal-total-price-display">0.00</strong> €</p>
+                    
+                    <div class="form-group">
+                        <label for="modal-buyer-name" class="form-label">Nombre Completo:</label>
+                        <input type="text" id="modal-buyer-name" name="nombreComprador" class="form-input" placeholder="Tu nombre completo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="modal-buyer-email" class="form-label">Email:</label>
+                        <input type="email" id="modal-buyer-email" name="emailComprador" class="form-input" placeholder="tu@email.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="modal-card-element" class="form-label">Datos de la Tarjeta:</label>
+                        <div id="modal-card-element" class="stripe-card-element">
+                            </div>
+                        <div id="modal-card-errors" role="alert" class="stripe-errors"></div>
+                    </div>
+                    
+                    <button type="submit" id="modal-pay-button" class="button button-primary pay-button">Pagar</button>
+                </form>
+            </div>
+
+            <div id="modal-confirmation-area" style="display: none;" class="confirmation-area">
+                <h4 class="confirmation-title">¡Compra Realizada con Éxito!</h4>
+                <p>En breve recibirás un email con los detalles de tu compra.</p>
+                <div id="modal-purchased-ticket-details" class="purchased-ticket-info">
+                    </div>
+                <img id="modal-purchased-ticket-qr" src="" alt="Código QR de tu entrada" class="qr-code-image">
+                <button id="modal-close-confirmation-button" class="button button-secondary">Cerrar</button>
+            </div>
+        </div>
+    </div>
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/basiclightbox@5.0.4/dist/basicLightbox.min.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
     <script src="script.js"></script>
 </body>
 </html>

@@ -434,3 +434,132 @@ body[data-theme="dark"] .location-map-placeholder {
      /* La imagen del mapa en sí no se ve afectada por el tema oscuro,
         pero el contenedor sí puede tener estilos diferentes */
 }
+
+/* --- Modal de Compra --- */
+.purchase-modal {
+    display: none; /* Oculta por defecto */
+    position: fixed;
+    z-index: 1000; /* Asegurar que esté por encima de todo */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Habilitar scroll si el contenido es muy largo */
+    background-color: rgba(0,0,0,0.6); /* Fondo oscuro semi-transparente */
+    align-items: center; /* Centrado vertical */
+    justify-content: center; /* Centrado horizontal */
+}
+
+.purchase-modal-content {
+    background-color: var(--color-light-2); /* O el color de fondo de tus secciones */
+    color: var(--color-dark-1);
+    margin: auto;
+    padding: 30px;
+    border-radius: var(--border-radius-large, 12px); /* Usa tus variables de radio */
+    box-shadow: var(--shadow-large, 0 10px 25px rgba(0,0,0,0.1));
+    width: 90%;
+    max-width: 550px; /* Ancho máximo de la modal */
+    position: relative;
+    animation: fadeInModal 0.3s var(--ease-out-expo); /* Animación de entrada */
+}
+
+body[data-theme="dark"] .purchase-modal-content {
+    background-color: var(--color-dark-2);
+    color: var(--color-light-1);
+}
+
+@keyframes fadeInModal {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-close-button {
+    color: var(--color-dark-3);
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+body[data-theme="dark"] .modal-close-button {
+    color: var(--color-light-1);
+}
+.modal-close-button:hover,
+.modal-close-button:focus {
+    color: var(--color-primary); /* O un color de acento */
+    text-decoration: none;
+}
+
+.modal-title {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    color: var(--color-primary); /* O tu color de heading principal */
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+body[data-theme="dark"] .modal-title {
+     color: var(--color-secondary);
+}
+
+.payment-form .form-group {
+    margin-bottom: 20px;
+}
+.payment-form .form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600; /* Poppins semibold */
+    font-size: 0.9rem;
+}
+.payment-form .form-input,
+.stripe-card-element { /* Estilo base para el contenedor de Stripe */
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ccc; /* Ajusta el color del borde */
+    border-radius: var(--border-radius, 6px);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+ body[data-theme="dark"] .payment-form .form-input,
+ body[data-theme="dark"] .stripe-card-element {
+    background-color: var(--color-dark-3);
+    border-color: var(--color-dark-1);
+    color: var(--color-light-1);
+ }
+
+
+.payment-form .form-input:focus,
+.stripe-card-element--focus { /* Stripe añade esta clase al enfocar */
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb, 0, 188, 212), 0.2); /* Simula un outline suave */
+}
+
+.stripe-errors {
+    color: var(--color-pink-accent, #E91E63); /* Un color de error, ej. rosa o rojo */
+    font-size: 0.85rem;
+    margin-top: 8px;
+    min-height: 1.2em; /* Para que no salte el layout */
+}
+
+.total-price-info {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin: 15px 0;
+    text-align: right;
+}
+
+.pay-button { /* Hereda de .button .button-primary, puedes añadir más aquí */
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1rem;
+    margin-top: 10px;
+}
+
+.confirmation-area { text-align: center; }
+.confirmation-title { font-size: 1.5rem; color: var(--color-primary); margin-bottom: 15px; }
+.qr-code-image { display: block; margin: 20px auto; max-width: 200px; border: 1px solid #eee; }
