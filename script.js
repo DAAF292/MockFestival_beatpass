@@ -5,10 +5,12 @@
  * - Añadido console.log(JSON.stringify(ticket)) para inspeccionar la estructura completa
  * del objeto ticket que viene de la API.
  * - Corregido el uso de 'cantidadDisponible' a 'stock' para reflejar la propiedad real de la API.
+ * - Añadidos logs de depuración para el flujo de compra.
  */
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- Configuración ---
+    //const API_BASE_URL = 'http://localhost:8081/BeatpassTFG/api'; // Asegúrate que este es el backend que quieres probar
     const API_BASE_URL = 'https://daw2-tfg-beatpass.onrender.com/api';
     const FESTIVAL_ID = 20;
     const CLAVE_PUBLICABLE_STRIPE = 'pk_test_51RLUyq4Et9Src69RTyKKrqn48wubA5QIbS9zTguw8chLB8FGgwMt9sZV6VwvT4UEWE0vnKxaJCNFlj87EY6i9mGK00ggcR1AiX';
@@ -96,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchFestivalDetails(festivalId) {
         const url = `${API_BASE_URL}/festivales/${festivalId}`;
         try {
-            console.log(`Workspaceing festival details from: ${url}`); // Corregido: "Workspaceing" a "Fetching"
+            console.log(`Workspaceing festival details from: ${url}`);
             const response = await fetch(url);
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
@@ -115,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchTicketTypes(festivalId) {
         const url = `${API_BASE_URL}/festivales/${festivalId}/entradas`;
         try {
-            console.log(`Workspaceing ticket types from: ${url}`); // Corregido: "Workspaceing" a "Fetching"
+            console.log(`Workspaceing ticket types from: ${url}`);
             const response = await fetch(url);
             if (!response.ok) {
                 if (response.status === 404) {
@@ -130,6 +132,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             console.log('Ticket types received (raw API data):', JSON.parse(JSON.stringify(data)));
             tiposDeEntradaGlobal = data || [];
+            // *** NUEVO LOG ***
+            console.log('Tipos de Entrada Globales (script.js) después de fetch:', JSON.parse(JSON.stringify(tiposDeEntradaGlobal)));
             return tiposDeEntradaGlobal;
         } catch (error) {
             console.error(`Error fetching ticket types (${url}):`, error);
@@ -152,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const nameElement1 = document.getElementById('festival-name-line1');
         if (nameElement1) nameElement1.textContent = festivalData.nombre || 'Nombre del Festival';
         const nameElement2 = document.getElementById('festival-name-line2');
-        if (nameElement2) nameElement2.textContent = ''; // Asumiendo que la línea 2 no se usa o se deja vacía
+        if (nameElement2) nameElement2.textContent = ''; 
 
         const subtitleElement = document.getElementById('festival-subtitle');
         if (subtitleElement) subtitleElement.textContent = festivalData.descripcion || 'Vive la experiencia';
@@ -162,7 +166,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const formatDate = (dateString) => {
                 if (!dateString) return '?';
                 try {
-                    // Asegurar que la fecha se interpreta correctamente como local añadiendo la hora
                     const date = new Date(dateString + 'T00:00:00'); 
                     return new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'long' }).format(date);
                 } catch (e) { console.error("Error formateando fecha:", dateString, e); return dateString; }
@@ -185,24 +188,23 @@ document.addEventListener('DOMContentLoaded', () => {
             if (loadingMessageElement) loadingMessageElement.textContent = 'Error al cargar sección de entradas.';
             return;
         }
-        grid.innerHTML = ''; // Limpiar antes de añadir nuevas cards
+        grid.innerHTML = ''; 
 
         if (!tiposDeEntradaGlobal || tiposDeEntradaGlobal.length === 0) {
             console.log("No ticket types to display or tiposDeEntradaGlobal is empty.");
             grid.innerHTML = '<p class="text-center col-span-full" style="grid-column: 1 / -1;">No hay entradas disponibles en este momento.</p>';
             return;
         }
-        console.log("Displaying ticket types:", tiposDeEntradaGlobal);
+        console.log("Displaying ticket types:", JSON.parse(JSON.stringify(tiposDeEntradaGlobal)));
 
         tiposDeEntradaGlobal.forEach((ticket, index) => {
             console.log(`Processing ticket [${index}]:`, JSON.stringify(ticket, null, 2));
 
-            // VALIDACIÓN: Usando ticket.stock y también verificando ticket.descripcion
             if (!ticket ||
                 typeof ticket.idEntrada !== 'number' ||
                 typeof ticket.tipo !== 'string' ||
                 typeof ticket.precio !== 'number' ||
-                typeof ticket.descripcion !== 'string' || // Añadida validación para descripción
+                typeof ticket.descripcion !== 'string' || 
                 typeof ticket.stock !== 'number') {
                 console.warn(`Saltando ticket [${index}] por datos incompletos o inválidos (props API):`, ticket);
                 return; 
@@ -224,7 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const description = document.createElement('p');
             description.classList.add('ticket-description');
-            description.textContent = ticket.descripcion; // Ya validado que existe y es string
+            description.textContent = ticket.descripcion;
 
             const priceDisplay = document.createElement('div');
             priceDisplay.classList.add('ticket-price');
@@ -232,7 +234,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const stockDisplay = document.createElement('p');
             stockDisplay.classList.add('ticket-stock');
-            // CORREGIDO: Usar ticket.stock
             stockDisplay.textContent = ticket.stock > 0 ? `Disponibles: ${ticket.stock}` : 'Agotadas';
 
             contentDiv.appendChild(name);
@@ -241,14 +242,13 @@ document.addEventListener('DOMContentLoaded', () => {
             contentDiv.appendChild(stockDisplay);
             card.appendChild(contentDiv);
 
-            // CORREGIDO: Usar ticket.stock
             if (ticket.stock > 0) {
                 const buyButton = document.createElement('button');
                 buyButton.classList.add('cta-button', 'ticket-buy-action-button');
-                buyButton.dataset.ticketId = ticket.idEntrada;
-                const buttonText = ticket.tipo.split(' ')[0]; // Toma la primera palabra del tipo para el botón
+                buyButton.dataset.ticketId = ticket.idEntrada; // Aquí se establece el ID
+                const buttonText = ticket.tipo.split(' ')[0]; 
                 buyButton.innerHTML = `<span>Comprar ${buttonText}</span>`;
-                buyButton.addEventListener('click', () => openPurchaseModal(ticket.idEntrada));
+                buyButton.addEventListener('click', () => openPurchaseModal(ticket.idEntrada)); // Se pasa idEntrada
                 card.appendChild(buyButton);
             } else {
                 const agotadoMsg = document.createElement('p');
@@ -260,19 +260,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (typeof AOS !== 'undefined' && !prefersReducedMotion) {
-            AOS.refreshHard(); // Refrescar AOS para aplicar animaciones a los nuevos elementos
+            AOS.refreshHard(); 
         }
     }
 
     // =========================================================================
     // == Lógica de Compra de Entradas
     // =========================================================================
-    function openPurchaseModal(ticketIdFromAPI) {
-        currentSelectedTicketType = tiposDeEntradaGlobal.find(t => t.idEntrada === ticketIdFromAPI);
+    function openPurchaseModal(ticketIdFromAPI) { // ticketIdFromAPI es el idEntrada del botón
+        // *** NUEVOS LOGS ***
+        console.log('[openPurchaseModal] ticketIdFromAPI:', ticketIdFromAPI, '(tipo:', typeof ticketIdFromAPI, ')');
+        console.log('[openPurchaseModal] tiposDeEntradaGlobal al abrir modal:', JSON.parse(JSON.stringify(tiposDeEntradaGlobal)));
+
+        // Usar Number() para asegurar que la comparación es correcta si ticketIdFromAPI es string
+        currentSelectedTicketType = tiposDeEntradaGlobal.find(t => t.idEntrada === Number(ticketIdFromAPI));
         
-        // CORREGIDO: Usar currentSelectedTicketType.stock
+        // *** NUEVO LOG ***
+        console.log('[openPurchaseModal] currentSelectedTicketType después de find:', JSON.parse(JSON.stringify(currentSelectedTicketType)));
+        
         if (!currentSelectedTicketType || currentSelectedTicketType.stock <= 0) {
-            alert("Este tipo de entrada no está disponible o está agotado.");
+            alert("Este tipo de entrada no está disponible, no se encontró o está agotado.");
+            console.warn('[openPurchaseModal] Problema con currentSelectedTicketType o stock:', currentSelectedTicketType);
             return;
         }
 
@@ -286,7 +294,6 @@ document.addEventListener('DOMContentLoaded', () => {
         modalSelectedTicketName.textContent = currentSelectedTicketType.tipo;
         modalSelectedTicketPrice.textContent = currentSelectedTicketType.precio.toFixed(2);
         modalTicketQuantityInput.value = 1;
-        // CORREGIDO: Usar currentSelectedTicketType.stock
         modalTicketQuantityInput.max = currentSelectedTicketType.stock; 
         updateModalTotalPrice();
 
@@ -309,7 +316,6 @@ document.addEventListener('DOMContentLoaded', () => {
         modalCardElement = elements.create('card', { /* opciones de estilo si las tienes */ });
         purchaseModal.style.display = 'flex';
 
-        // Pequeño delay para asegurar que el DOM de la modal está visible antes de montar Stripe
         setTimeout(() => {
             const cardMountElement = document.getElementById('modal-card-element');
             if (cardMountElement) {
@@ -320,13 +326,13 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 console.error("Contenedor #modal-card-element no encontrado para Stripe.");
                 displayError("Error al preparar el formulario de pago (Stripe).", true);
-                purchaseModal.style.display = 'none'; // Ocultar modal si falla Stripe
+                purchaseModal.style.display = 'none';
             }
         }, 50);
 
         modalFormArea.style.display = 'block';
         modalConfirmationArea.style.display = 'none';
-        modalPaymentForm.reset(); // Resetea campos del formulario como nombre y email
+        modalPaymentForm.reset(); 
         if(modalCardErrors) modalCardErrors.textContent = '';
     }
 
@@ -334,7 +340,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!currentSelectedTicketType || !modalTicketQuantityInput || !modalTotalPriceDisplay || !modalPayButton || !modalCardErrors) return;
         
         const cantidad = parseInt(modalTicketQuantityInput.value) || 0;
-        // CORREGIDO: Usar currentSelectedTicketType.stock
         const stockDisponible = currentSelectedTicketType.stock;
 
         if (cantidad > 0 && cantidad <= stockDisponible) {
@@ -347,11 +352,11 @@ document.addEventListener('DOMContentLoaded', () => {
             modalTotalPriceDisplay.textContent = '0.00';
             modalPayButton.textContent = 'Pagar';
             modalPayButton.disabled = true;
-            if (cantidad <= 0 && currentSelectedTicketType.precio > 0) { // Asegurar que no muestre error si el precio es 0 o el tipo no está seleccionado
+            if (cantidad <= 0 && currentSelectedTicketType.precio > 0) {
                 modalCardErrors.textContent = 'La cantidad debe ser al menos 1.';
-            } else if (cantidad > stockDisponible && stockDisponible > 0) { // Solo si realmente hay un stock limitado
+            } else if (cantidad > stockDisponible && stockDisponible > 0) { 
                 modalCardErrors.textContent = `Cantidad máxima disponible: ${stockDisponible}.`;
-            } else if (stockDisponible <= 0 && currentSelectedTicketType.precio > 0) { // Si el stock es 0
+            } else if (stockDisponible <= 0 && currentSelectedTicketType.precio > 0) { 
                 modalCardErrors.textContent = 'Entradas agotadas para este tipo.';
             }
         }
@@ -360,10 +365,25 @@ document.addEventListener('DOMContentLoaded', () => {
     async function handleModalPurchaseSubmit(event) {
         event.preventDefault();
         if (!modalPayButton || !modalCardErrors || !stripe || !modalCardElement || !modalTicketQuantityInput || !modalBuyerNameInput || !modalBuyerEmailInput || !currentSelectedTicketType) {
-            console.error("Elementos de pago, formulario o tipo de entrada no inicializados.");
+            console.error("Elementos de pago, formulario o tipo de entrada no inicializados. currentSelectedTicketType:", currentSelectedTicketType);
             displayError("Error en el sistema de pago. Inténtalo de nuevo.", true);
             return;
         }
+
+        // *** NUEVOS LOGS ***
+        console.log('[handleModalPurchaseSubmit] Iniciando envío. currentSelectedTicketType:', JSON.parse(JSON.stringify(currentSelectedTicketType)));
+        if (!currentSelectedTicketType || typeof currentSelectedTicketType.idEntrada === 'undefined') {
+            console.error('[handleModalPurchaseSubmit] ERROR FATAL: currentSelectedTicketType o su idEntrada no está definido antes de la compra.');
+            modalCardErrors.textContent = 'Error interno: No se ha seleccionado un tipo de entrada válido para la compra.';
+            // No deshabilitar el botón aquí, dejar que las validaciones de abajo lo hagan si es necesario.
+            // pero sí restaurarlo si ya estaba deshabilitado.
+            if(modalPayButton.disabled) {
+                 modalPayButton.disabled = false;
+                 updateModalTotalPrice(); // Esto podría re-deshabilitarlo si la cantidad es 0.
+            }
+            return; 
+        }
+
 
         modalPayButton.disabled = true;
         modalPayButton.textContent = 'Procesando...';
@@ -376,28 +396,40 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!nombreComprador || !emailComprador || !/^\S+@\S+\.\S+$/.test(emailComprador) || cantidad <= 0) {
             modalCardErrors.textContent = 'Por favor, completa todos los campos (Nombre, Email válido, Cantidad > 0).';
             modalPayButton.disabled = false;
-            updateModalTotalPrice(); // Actualiza el texto del botón si es necesario
+            updateModalTotalPrice(); 
             return;
         }
+        
+        // *** NUEVO LOG ***
+        const payloadIniciarCompra = {
+            idFestival: FESTIVAL_ID,
+            idTipoEntrada: currentSelectedTicketType.idEntrada, // Proviene de la modal
+            cantidad: cantidad,
+            nombreComprador: nombreComprador,
+            emailComprador: emailComprador
+        };
+        console.log("[handleModalPurchaseSubmit] Payload para iniciar-compra:", JSON.parse(JSON.stringify(payloadIniciarCompra)));
+
 
         try {
             // 1. Iniciar Compra en el Backend
+            console.log("[handleModalPurchaseSubmit] Enviando a iniciar-compra...");
             const initResponse = await fetch(`${API_BASE_URL}/public/ventas/iniciar-compra`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    idFestival: FESTIVAL_ID,
-                    idTipoEntrada: currentSelectedTicketType.idEntrada,
-                    cantidad: cantidad,
-                    nombreComprador: nombreComprador,
-                    emailComprador: emailComprador
-                })
+                body: JSON.stringify(payloadIniciarCompra)
             });
+
+            console.log("[handleModalPurchaseSubmit] Respuesta cruda de iniciar-compra:", initResponse);
             const initData = await initResponse.json();
+            console.log("[handleModalPurchaseSubmit] Datos JSON de iniciar-compra:", initData);
+
             if (!initResponse.ok) throw new Error(initData.mensaje || `Error al iniciar compra (${initResponse.status})`);
             
             currentClientSecret = initData.clientSecretStripe;
             currentIdCompraTemporal = initData.idCompraTemporal;
+            console.log("[handleModalPurchaseSubmit] clientSecret:", currentClientSecret, "idCompraTemporal:", currentIdCompraTemporal);
+
 
             // 2. Confirmar Pago con Stripe Elements
             const { paymentIntent, error: stripeError } = await stripe.confirmCardPayment(currentClientSecret, {
@@ -407,35 +439,44 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            if (stripeError) { // Error de Stripe (tarjeta rechazada, etc.)
+            if (stripeError) {
+                console.error("[handleModalPurchaseSubmit] Error de Stripe al confirmar pago:", stripeError);
                 throw new Error(stripeError.message);
             }
+            console.log("[handleModalPurchaseSubmit] PaymentIntent de Stripe:", paymentIntent);
             
-            // 3. Confirmar Compra en el Backend (si Stripe tuvo éxito)
+            // 3. Confirmar Compra en el Backend
             if (paymentIntent && paymentIntent.status === 'succeeded') {
+                const payloadConfirmarCompra = {
+                    paymentIntentId: paymentIntent.id,
+                    idCompraTemporal: currentIdCompraTemporal 
+                };
+                console.log("[handleModalPurchaseSubmit] Payload para confirmar-compra-stripe:", JSON.parse(JSON.stringify(payloadConfirmarCompra)));
+                
                 const confirmResponse = await fetch(`${API_BASE_URL}/public/ventas/confirmar-compra-stripe`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        paymentIntentId: paymentIntent.id,
-                        idCompraTemporal: currentIdCompraTemporal 
-                    })
+                    body: JSON.stringify(payloadConfirmarCompra)
                 });
-                const entradasAdquiridas = await confirmResponse.json(); // Debería ser un array de EntradaAsignadaDTO
+                
+                console.log("[handleModalPurchaseSubmit] Respuesta cruda de confirmar-compra-stripe:", confirmResponse);
+                const entradasAdquiridas = await confirmResponse.json();
+                console.log("[handleModalPurchaseSubmit] Datos JSON de confirmar-compra-stripe (entradas adquiridas):", entradasAdquiridas);
+
                 if (!confirmResponse.ok) throw new Error(entradasAdquiridas.mensaje || `Error al confirmar compra en servidor (${confirmResponse.status})`);
                 
                 displayPurchaseConfirmation(entradasAdquiridas);
-                loadFestivalData(); // Recargar datos para actualizar stock visual
+                loadFestivalData(); 
             } else {
-                // Si paymentIntent no existe o el estado no es 'succeeded'
+                console.warn("[handleModalPurchaseSubmit] El estado del PaymentIntent de Stripe no fue 'succeeded':", paymentIntent ? paymentIntent.status : 'PaymentIntent nulo');
                 throw new Error("El pago con Stripe no pudo completarse o fue cancelado.");
             }
 
         } catch (error) {
-            console.error("Error en el proceso de compra:", error);
-            modalCardErrors.textContent = error.message;
+            console.error("Error en el proceso de compra (script.js):", error);
+            modalCardErrors.textContent = error.message || "Ocurrió un error desconocido durante la compra.";
             modalPayButton.disabled = false;
-            updateModalTotalPrice(); // Restaura el estado del botón
+            updateModalTotalPrice(); 
         }
     }
 
@@ -446,7 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modalConfirmationArea.style.display = 'block';
 
         if (entradasCompradas && entradasCompradas.length > 0) {
-            const primeraEntrada = entradasCompradas[0]; // Asumimos que la info relevante está en la primera
+            const primeraEntrada = entradasCompradas[0]; 
             modalPurchasedTicketDetails.innerHTML = `
                 <p><strong>Tipo:</strong> ${primeraEntrada.nombreTipoEntrada || 'N/A'}</p>
                 <p><strong>Comprador:</strong> ${primeraEntrada.nombreComprador || 'N/A'}</p>
@@ -463,9 +504,9 @@ document.addEventListener('DOMContentLoaded', () => {
             modalPurchasedTicketDetails.innerHTML = "<p>No se pudieron obtener los detalles de la compra. Por favor, revisa tu email para la confirmación.</p>";
             modalPurchasedTicketQr.style.display = 'none';
         }
-        if(modalCardElement) modalCardElement.clear(); // Limpiar datos de tarjeta
-        modalPaymentForm.reset(); // Limpiar nombre y email
-        updateModalTotalPrice(); // Resetear botón y total
+        if(modalCardElement) modalCardElement.clear(); 
+        modalPaymentForm.reset(); 
+        updateModalTotalPrice(); 
     }
     
     function generateAndDisplayModalQR(qrText) {
@@ -477,10 +518,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!modalPurchasedTicketQr) return;
 
         try {
-            const qr = qrcode(0, 'L'); // typeNumber 0 para auto-detect, 'L' para baja corrección de errores
+            const qr = qrcode(0, 'L'); 
             qr.addData(qrText);
             qr.make();
-            modalPurchasedTicketQr.src = qr.createDataURL(6, 0); // (cellSize, margin)
+            modalPurchasedTicketQr.src = qr.createDataURL(6, 0); 
             modalPurchasedTicketQr.style.display = 'block';
         } catch (e) {
             console.error("Error generando QR:", e);
@@ -490,10 +531,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function closePurchaseModal() {
         if (purchaseModal) purchaseModal.style.display = 'none';
-        if (modalCardElement) modalCardElement.clear(); // Limpia el elemento de tarjeta
+        if (modalCardElement) modalCardElement.clear(); 
         if (modalPaymentForm) modalPaymentForm.reset();
-        currentSelectedTicketType = null; // Resetea el tipo de entrada seleccionado
-        // Asegurar que se muestra el formulario y no la confirmación la próxima vez
+        currentSelectedTicketType = null; 
         if (modalFormArea) modalFormArea.style.display = 'block'; 
         if (modalConfirmationArea) modalConfirmationArea.style.display = 'none';
     }
@@ -507,49 +547,44 @@ document.addEventListener('DOMContentLoaded', () => {
             AOS.init({ duration: 900, easing: 'ease-out-cubic', once: true, offset: 100 });
         } else if (typeof AOS !== 'undefined' && prefersReducedMotion) {
             console.log('AOS animations disabled (prefers-reduced-motion). Applying static styles.');
-            // Aplica estilos finales para evitar elementos invisibles o fuera de lugar
             document.querySelectorAll('[data-aos]').forEach(el => {
                 el.style.opacity = 1;
-                el.style.transform = 'none'; // O el transform final esperado
-                el.classList.add('aos-animate'); // Para que no se inicialice de nuevo si algo lo intenta
+                el.style.transform = 'none'; 
+                el.classList.add('aos-animate'); 
             });
         } else { console.warn('AOS library not found.'); }
     }
 
     function hideLoader() {
-        if (body.classList.contains('loading')) { // Solo actuar si el loader está activo
+        if (body.classList.contains('loading')) { 
             body.classList.remove('loading');
             if (loader) {
-                loader.classList.add('hidden'); // Inicia transición de ocultado
-                // Eliminar el loader del DOM después de la transición para limpiar
+                loader.classList.add('hidden'); 
                 loader.addEventListener('transitionend', () => loader?.remove(), { once: true });
             }
-            // Solo inicializar AOS si no se ha hecho antes (evita re-inicializaciones)
-            if(!document.querySelector('.aos-animate')) { // Chequea si AOS ya aplicó clases
+            if(!document.querySelector('.aos-animate')) { 
                 initAOS();
             }
         }
     }
 
-    // Gestión del Loader y AOS
     if (loader) {
-        window.addEventListener('load', hideLoader); // Ocultar al cargar completamente la página
-        setTimeout(hideLoader, 3500); // Fallback por si 'load' no se dispara o tarda mucho
+        window.addEventListener('load', hideLoader); 
+        setTimeout(hideLoader, 3500); 
     } else {
-        initAOS(); // Si no hay loader, inicializar AOS directamente
+        initAOS(); 
     }
 
-    // Cursor Personalizado (si existe y no hay preferencia de movimiento reducido)
     if (cursorDot && cursorRing && window.matchMedia("(pointer: fine)").matches && !prefersReducedMotion) {
         let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
         let ringX = mouseX, ringY = mouseY, dotX = mouseX, dotY = mouseY;
-        const ringSpeed = 0.12; // Ajusta para más o menos "lag" del anillo
+        const ringSpeed = 0.12; 
         let isCursorVisible = false;
 
         const updateCursor = () => {
-            dotX = mouseX; // El punto sigue al cursor directamente
+            dotX = mouseX; 
             dotY = mouseY;
-            ringX += (mouseX - ringX) * ringSpeed; // El anillo se mueve más suavemente
+            ringX += (mouseX - ringX) * ringSpeed; 
             ringY += (mouseY - ringY) * ringSpeed;
             
             if (!isNaN(dotX) && !isNaN(dotY)) cursorDot.style.transform = `translate(${dotX}px, ${dotY}px) translate(-50%, -50%)`;
@@ -560,7 +595,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('mousemove', (e) => {
             mouseX = e.clientX; 
             mouseY = e.clientY;
-            if (!isCursorVisible) { // Mostrar al primer movimiento
+            if (!isCursorVisible) { 
                 cursorDot.style.opacity = 1; cursorRing.style.opacity = 1; isCursorVisible = true;
             }
         }, { passive: true });
@@ -568,32 +603,29 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('mouseleave', () => { if (cursorDot) cursorDot.style.opacity = 0; if (cursorRing) cursorRing.style.opacity = 0; isCursorVisible = false; });
         document.addEventListener('mouseenter', () => { if (cursorDot) cursorDot.style.opacity = 1; if (cursorRing) cursorRing.style.opacity = 1; isCursorVisible = true; });
         
-        updateCursor(); // Iniciar animación
-    } else if (cursorDot || cursorRing) { // Ocultar si no se cumplen condiciones
+        updateCursor(); 
+    } else if (cursorDot || cursorRing) { 
         if (cursorDot) cursorDot.style.display = 'none';
         if (cursorRing) cursorRing.style.display = 'none';
-        body.style.cursor = 'default'; // Restaurar cursor por defecto
+        body.style.cursor = 'default'; 
     }
     
-    // Header Scroll
     if (header) {
         const handleHeaderScroll = () => header.classList.toggle('scrolled', window.scrollY > 80);
         window.addEventListener('scroll', debounce(handleHeaderScroll, 10), { passive: true });
-        handleHeaderScroll(); // Ejecutar una vez al cargar por si la página ya está scrolleada
+        handleHeaderScroll(); 
     }
 
-    // Menú Móvil
     if (menuToggle && navMenu) {
-        const navLinks = navMenu.querySelectorAll('.nav-link'); // Enlaces dentro del menú
+        const navLinks = navMenu.querySelectorAll('.nav-link'); 
         menuToggle.addEventListener('click', () => {
             const isActive = navMenu.classList.toggle('active');
             menuToggle.classList.toggle('open');
             menuToggle.setAttribute('aria-expanded', isActive);
-            body.style.overflowY = isActive ? 'hidden' : ''; // Evitar scroll del body cuando el menú está abierto
+            body.style.overflowY = isActive ? 'hidden' : ''; 
         });
-        // Cerrar menú al hacer clic en un enlace (para SPAs o navegación en la misma página)
         navLinks.forEach(link => link.addEventListener('click', () => {
-            if (navMenu.classList.contains('active')) { // Solo si el menú está activo
+            if (navMenu.classList.contains('active')) { 
                 navMenu.classList.remove('active');
                 menuToggle.classList.remove('open');
                 menuToggle.setAttribute('aria-expanded', 'false');
@@ -602,12 +634,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }));
     }
 
-    // Active Nav Link on Scroll (Intersection Observer)
     if (sections.length > 0 && navLiAnchors.length > 0 && typeof IntersectionObserver !== 'undefined') {
         const observerCallback = (entries) => {
             let topEntry = null;
             entries.forEach(entry => {
-                // Considerar visible si al menos una pequeña parte está en viewport Y está más arriba o es el primero
                 if (entry.isIntersecting && (!topEntry || entry.boundingClientRect.top < topEntry.boundingClientRect.top) && entry.intersectionRatio > 0) {
                     topEntry = entry;
                 }
@@ -615,40 +645,35 @@ document.addEventListener('DOMContentLoaded', () => {
             const currentActiveId = topEntry ? topEntry.target.getAttribute('id') : null;
             navLiAnchors.forEach(a => a.classList.toggle('active', a.getAttribute('href') === `#${currentActiveId}`));
         };
-        // Ajusta rootMargin: arriba, derecha, abajo, izquierda. 
-        // -40% arriba para activar cuando la sección esté más centrada. -59% abajo para desactivar cuando casi sale.
         const sectionObserver = new IntersectionObserver(observerCallback, { root: null, rootMargin: '-40% 0px -59% 0px', threshold: 0 }); 
         sections.forEach(section => sectionObserver.observe(section));
     }
     
-    // Parallax Hero (si existe y no hay preferencia de movimiento reducido)
     if (heroSection && !prefersReducedMotion) {
         const layers = heroSection.querySelectorAll('.hero-bg-layer');
         if (layers.length > 0) {
             let rafParallaxId;
             const handleParallaxScroll = () => {
-                const scrollFactor = window.scrollY * 0.3; // Ajusta la intensidad del parallax
+                const scrollFactor = window.scrollY * 0.3; 
                 layers.forEach(layer => {
                     const speed = parseFloat(layer.getAttribute('data-speed') || '0');
                     layer.style.transform = `translate3d(0, ${scrollFactor * speed}px, 0)`;
                 });
-                rafParallaxId = null; // Permitir que se vuelva a solicitar el frame
+                rafParallaxId = null; 
             };
-            // Optimizar con requestAnimationFrame
             const debouncedScrollHandler = () => { if (!rafParallaxId) rafParallaxId = requestAnimationFrame(handleParallaxScroll); };
             window.addEventListener('scroll', debouncedScrollHandler, { passive: true });
-            handleParallaxScroll(); // Aplicar estado inicial
+            handleParallaxScroll(); 
         }
     }
 
-    // Lightbox para la galería (si existe la librería)
     if (typeof basicLightbox !== 'undefined') {
         document.body.addEventListener('click', (e) => {
-            const galleryLink = e.target.closest('.gallery-item'); // Busca el ancestro más cercano
+            const galleryLink = e.target.closest('.gallery-item'); 
             if (galleryLink) {
                 e.preventDefault();
                 const imageUrl = galleryLink.getAttribute('href');
-                if (imageUrl && imageUrl !== '#') { // Asegurarse que hay una URL válida
+                if (imageUrl && imageUrl !== '#') { 
                     try { basicLightbox.create(`<img src="${imageUrl}" alt="Vista ampliada">`, { className: 'rds-lightbox' }).show(); }
                     catch (error) { console.error("Lightbox error:", error); }
                 }
@@ -656,28 +681,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     } else { console.warn('basicLightbox library not found.'); }
 
-    // Theme Toggle
     if (themeToggleButton) {
         const applyTheme = (theme) => { 
             body.setAttribute('data-theme', theme); 
-            localStorage.setItem('theme', theme); // Guardar preferencia
+            localStorage.setItem('theme', theme); 
         };
-        // Cargar tema guardado o preferido por el sistema
         const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         applyTheme(savedTheme);
         themeToggleButton.addEventListener('click', () => applyTheme(body.getAttribute('data-theme') === 'light' ? 'dark' : 'light'));
     }
 
-    // Smooth Scroll para anclas internas
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
             const targetId = this.getAttribute('href');
-            if (targetId === '#' || !targetId.startsWith('#')) return; // Ignorar href="#" o enlaces externos
+            if (targetId === '#' || !targetId.startsWith('#')) return; 
             
             const targetElement = document.querySelector(targetId);
             if (targetElement) {
                 e.preventDefault();
-                const headerOffset = (header ? header.offsetHeight : 0) + 20; // Offset del header + un poco de padding
+                const headerOffset = (header ? header.offsetHeight : 0) + 20; 
                 const elementPosition = targetElement.getBoundingClientRect().top;
                 const offsetPosition = window.pageYOffset + elementPosition - headerOffset;
                 
@@ -686,7 +708,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     behavior: prefersReducedMotion ? 'auto' : 'smooth'
                 });
 
-                // Si el menú móvil está abierto, cerrarlo
                 if (navMenu?.classList.contains('active')) {
                     navMenu.classList.remove('active');
                     menuToggle?.classList.remove('open');
@@ -699,10 +720,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     
-    // Artist Carousel Scroll Hint
     const checkScrollable = () => {
         if (carousel && carouselWrapper) {
-            // Considerar scrollable si el contenido es un poco más ancho que el contenedor
             const isScrollable = carousel.scrollWidth > carousel.clientWidth + 5; 
             carouselWrapper.classList.toggle('is-scrollable', isScrollable);
         }
@@ -712,30 +731,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof ResizeObserver !== 'undefined') {
             const resizeObserver = new ResizeObserver(debounce(checkScrollable, 50));
             resizeObserver.observe(carouselWrapper);
-            resizeObserver.observe(carousel); // Observar ambos por si acaso
+            resizeObserver.observe(carousel); 
         } else {
-            // Fallback para navegadores sin ResizeObserver
             window.addEventListener('resize', debounce(checkScrollable, 250));
         }
-        // Comprobar al cargar y después de que las imágenes podrían haber cargado (si aplica)
-        // checkScrollable(); // Ya se llama en loadFestivalData
     }
 
-    // Placeholder para Newsletter
     const newsletterLink = document.querySelector('.newsletter-link');
     if (newsletterLink) {
         newsletterLink.addEventListener('click', (e) => {
-            e.preventDefault(); // Evitar que el enlace navegue si es un '#'
+            e.preventDefault(); 
             alert('Funcionalidad de suscripción no implementada en este prototipo.');
         });
     }
 
-    // Event Listeners para la Modal de Compra
     if (modalCloseButton) modalCloseButton.addEventListener('click', closePurchaseModal);
     if (modalCloseConfirmationButton) modalCloseConfirmationButton.addEventListener('click', closePurchaseModal);
     if (modalTicketQuantityInput) modalTicketQuantityInput.addEventListener('input', updateModalTotalPrice);
     if (modalPaymentForm) modalPaymentForm.addEventListener('submit', handleModalPurchaseSubmit);
-    // Cerrar modal si se hace clic fuera del contenido (en el overlay oscuro)
     if (purchaseModal) purchaseModal.addEventListener('click', (event) => { if (event.target === purchaseModal) closePurchaseModal(); });
 
 
@@ -743,40 +756,37 @@ document.addEventListener('DOMContentLoaded', () => {
     // == Carga Inicial de Datos del Festival
     // =========================================================================
     async function loadFestivalData() {
-        console.log("Loading festival data...");
-        if (errorContainer) errorContainer.style.display = 'none'; // Ocultar errores previos
+        console.log("Loading festival data (script.js)...");
+        if (errorContainer) errorContainer.style.display = 'none'; 
 
-        // Gestión del mensaje de carga para las entradas
         const ticketGridElement = document.getElementById('ticket-grid');
         const loadingTicketsP = document.getElementById('tickets-loading');
         
-        if (ticketGridElement && !loadingTicketsP) { // Si la grid existe pero el P de carga no
+        if (ticketGridElement && !loadingTicketsP) { 
             const p = document.createElement('p');
             p.id = 'tickets-loading';
-            p.className = 'text-center col-span-full'; // Tailwind para centrar y ocupar todo el ancho
-            p.style.gridColumn = '1 / -1'; // Asegurar que ocupe todas las columnas si es grid
+            p.className = 'text-center col-span-full'; 
+            p.style.gridColumn = '1 / -1'; 
             p.textContent = 'Cargando tipos de entrada...';
-            ticketGridElement.innerHTML = ''; // Limpiar grid
+            ticketGridElement.innerHTML = ''; 
             ticketGridElement.appendChild(p);
-        } else if (loadingTicketsP) { // Si el P de carga ya existe
+        } else if (loadingTicketsP) { 
              loadingTicketsP.textContent = 'Cargando tipos de entrada...';
              if (ticketGridElement) {ticketGridElement.innerHTML = ''; ticketGridElement.appendChild(loadingTicketsP);}
         }
 
-        // Cargar datos en paralelo
-        const [festivalData, ticketDataResult] = await Promise.all([
+        const [festivalData, ticketDataResult] = await Promise.all([ // ticketDataResult no se usa directamente aquí, fetchTicketTypes actualiza la global
             fetchFestivalDetails(FESTIVAL_ID),
-            fetchTicketTypes(FESTIVAL_ID) // Esto ya actualiza tiposDeEntradaGlobal
+            fetchTicketTypes(FESTIVAL_ID) 
         ]);
 
         displayFestivalDetails(festivalData);
-        displayTicketTypes(); // Usa la variable global tiposDeEntradaGlobal actualizada por fetchTicketTypes
+        displayTicketTypes(); 
 
-        console.log("Festival data loading complete.");
-        checkScrollable(); // Comprobar si el carrusel es desplazable después de cargar contenido
+        console.log("Festival data loading complete (script.js).");
+        checkScrollable(); 
     }
 
-    // Iniciar la carga de datos del festival
     loadFestivalData();
 
 }); // Fin del DOMContentLoaded
