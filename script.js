@@ -2,17 +2,17 @@
  * Ritmos Del Sur: Hyper-Oasis - Script Principal v8 (Debug Propiedades Ticket)
  *
  * Notas:
- * - Añadido console.log(JSON.stringify(ticket)) para inspeccionar la estructura completa
- * del objeto ticket que viene de la API.
- * - Corregido el uso de 'cantidadDisponible' a 'stock' para reflejar la propiedad real de la API.
- * - Añadidos logs de depuración para el flujo de compra.
+ * - Apuntando a los endpoints del simulador:
+ * - /public/venta/iniciar-pago (JSON, payload simplificado) - FUNCIONA
+ * - /public/venta/confirmar-compra (URLSearchParams, payload completo) - FUNCIONA (Devuelve 200 OK)
+ * - CORREGIDO el parseo de la respuesta de confirmar-compra para usar 'entradasGeneradas'.
+ * - Se mantienen los logs de depuración.
  */
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- Configuración ---
-    //const API_BASE_URL = 'http://localhost:8081/BeatpassTFG/api'; // Asegúrate que este es el backend que quieres probar
-    const API_BASE_URL = 'https://daw2-tfg-beatpass.onrender.com/api';
-    const FESTIVAL_ID = 20;
+    const API_BASE_URL = 'https://daw2-tfg-beatpass.onrender.com/api'; 
+    const FESTIVAL_ID = 20; 
     const CLAVE_PUBLICABLE_STRIPE = 'pk_test_51RLUyq4Et9Src69RTyKKrqn48wubA5QIbS9zTguw8chLB8FGgwMt9sZV6VwvT4UEWE0vnKxaJCNFlj87EY6i9mGK00ggcR1AiX';
 
     // --- Selectores DOM Globales ---
@@ -30,8 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const carouselWrapper = document.querySelector('.artist-carousel-wrapper');
     const carousel = document.querySelector('.artist-carousel-css');
     const errorContainer = document.getElementById('error-container');
-
-    // Selectores para la Modal de Compra
     const purchaseModal = document.getElementById('purchase-modal');
     const modalCloseButton = document.getElementById('modal-close-button');
     const modalTicketNameTitle = document.getElementById('modal-ticket-name-title');
@@ -54,13 +52,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastScrollY = window.scrollY;
     let rafIdCursor;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    // Estado para la compra
     let stripe = null;
     let modalCardElement = null;
     let currentSelectedTicketType = null;
     let currentClientSecret = null;
-    let currentIdCompraTemporal = null;
+    let currentIdCompraTemporal = null; 
     let tiposDeEntradaGlobal = [];
 
     // =========================================================================
@@ -132,7 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             console.log('Ticket types received (raw API data):', JSON.parse(JSON.stringify(data)));
             tiposDeEntradaGlobal = data || [];
-            // *** NUEVO LOG ***
             console.log('Tipos de Entrada Globales (script.js) después de fetch:', JSON.parse(JSON.stringify(tiposDeEntradaGlobal)));
             return tiposDeEntradaGlobal;
         } catch (error) {
@@ -146,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================================================
     // == Funciones de Renderizado del DOM
     // =========================================================================
-    function displayFestivalDetails(festivalData) {
+     function displayFestivalDetails(festivalData) {
         if (!festivalData) {
             document.getElementById('festival-name-line1').textContent = 'Festival';
             document.getElementById('festival-subtitle').textContent = 'Detalles no disponibles';
@@ -245,10 +240,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (ticket.stock > 0) {
                 const buyButton = document.createElement('button');
                 buyButton.classList.add('cta-button', 'ticket-buy-action-button');
-                buyButton.dataset.ticketId = ticket.idEntrada; // Aquí se establece el ID
+                buyButton.dataset.ticketId = ticket.idEntrada;
                 const buttonText = ticket.tipo.split(' ')[0]; 
                 buyButton.innerHTML = `<span>Comprar ${buttonText}</span>`;
-                buyButton.addEventListener('click', () => openPurchaseModal(ticket.idEntrada)); // Se pasa idEntrada
+                buyButton.addEventListener('click', () => openPurchaseModal(ticket.idEntrada));
                 card.appendChild(buyButton);
             } else {
                 const agotadoMsg = document.createElement('p');
@@ -265,17 +260,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =========================================================================
-    // == Lógica de Compra de Entradas
+    // == Lógica de Compra de Entradas (MODIFICADA)
     // =========================================================================
-    function openPurchaseModal(ticketIdFromAPI) { // ticketIdFromAPI es el idEntrada del botón
-        // *** NUEVOS LOGS ***
+    function openPurchaseModal(ticketIdFromAPI) {
         console.log('[openPurchaseModal] ticketIdFromAPI:', ticketIdFromAPI, '(tipo:', typeof ticketIdFromAPI, ')');
         console.log('[openPurchaseModal] tiposDeEntradaGlobal al abrir modal:', JSON.parse(JSON.stringify(tiposDeEntradaGlobal)));
-
-        // Usar Number() para asegurar que la comparación es correcta si ticketIdFromAPI es string
         currentSelectedTicketType = tiposDeEntradaGlobal.find(t => t.idEntrada === Number(ticketIdFromAPI));
-        
-        // *** NUEVO LOG ***
         console.log('[openPurchaseModal] currentSelectedTicketType después de find:', JSON.parse(JSON.stringify(currentSelectedTicketType)));
         
         if (!currentSelectedTicketType || currentSelectedTicketType.stock <= 0) {
@@ -313,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const elements = stripe.elements({ locale: 'es' });
-        modalCardElement = elements.create('card', { /* opciones de estilo si las tienes */ });
+        modalCardElement = elements.create('card', {});
         purchaseModal.style.display = 'flex';
 
         setTimeout(() => {
@@ -338,7 +328,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateModalTotalPrice() {
         if (!currentSelectedTicketType || !modalTicketQuantityInput || !modalTotalPriceDisplay || !modalPayButton || !modalCardErrors) return;
-        
         const cantidad = parseInt(modalTicketQuantityInput.value) || 0;
         const stockDisponible = currentSelectedTicketType.stock;
 
@@ -370,72 +359,67 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // *** NUEVOS LOGS ***
         console.log('[handleModalPurchaseSubmit] Iniciando envío. currentSelectedTicketType:', JSON.parse(JSON.stringify(currentSelectedTicketType)));
         if (!currentSelectedTicketType || typeof currentSelectedTicketType.idEntrada === 'undefined') {
             console.error('[handleModalPurchaseSubmit] ERROR FATAL: currentSelectedTicketType o su idEntrada no está definido antes de la compra.');
             modalCardErrors.textContent = 'Error interno: No se ha seleccionado un tipo de entrada válido para la compra.';
-            // No deshabilitar el botón aquí, dejar que las validaciones de abajo lo hagan si es necesario.
-            // pero sí restaurarlo si ya estaba deshabilitado.
             if(modalPayButton.disabled) {
                  modalPayButton.disabled = false;
-                 updateModalTotalPrice(); // Esto podría re-deshabilitarlo si la cantidad es 0.
+                 updateModalTotalPrice(); 
             }
             return; 
         }
-
 
         modalPayButton.disabled = true;
         modalPayButton.textContent = 'Procesando...';
         modalCardErrors.textContent = '';
 
         const cantidad = parseInt(modalTicketQuantityInput.value);
-        const nombreComprador = modalBuyerNameInput.value.trim();
-        const emailComprador = modalBuyerEmailInput.value.trim();
+        const nombreComprador = modalBuyerNameInput.value.trim(); 
+        const emailComprador = modalBuyerEmailInput.value.trim(); 
 
         if (!nombreComprador || !emailComprador || !/^\S+@\S+\.\S+$/.test(emailComprador) || cantidad <= 0) {
-            modalCardErrors.textContent = 'Por favor, completa todos los campos (Nombre, Email válido, Cantidad > 0).';
+            modalCardErrors.textContent = 'Por favor, completa tu Nombre, Email válido y asegura que la Cantidad sea mayor a 0.';
             modalPayButton.disabled = false;
             updateModalTotalPrice(); 
             return;
         }
         
-        // *** NUEVO LOG ***
-        const payloadIniciarCompra = {
-            idFestival: FESTIVAL_ID,
-            idTipoEntrada: currentSelectedTicketType.idEntrada, // Proviene de la modal
-            cantidad: cantidad,
-            nombreComprador: nombreComprador,
-            emailComprador: emailComprador
+        const payloadIniciarPago = {
+            idEntrada: currentSelectedTicketType.idEntrada, 
+            cantidad: cantidad
         };
-        console.log("[handleModalPurchaseSubmit] Payload para iniciar-compra:", JSON.parse(JSON.stringify(payloadIniciarCompra)));
-
+        console.log("[handleModalPurchaseSubmit] Payload para iniciar-pago (adaptado):", JSON.parse(JSON.stringify(payloadIniciarPago)));
 
         try {
-            // 1. Iniciar Compra en el Backend
-            console.log("[handleModalPurchaseSubmit] Enviando a iniciar-compra...");
-            const initResponse = await fetch(`${API_BASE_URL}/public/ventas/iniciar-compra`, {
+            console.log("[handleModalPurchaseSubmit] Enviando a iniciar-pago (adaptado)...");
+            const initResponse = await fetch(`${API_BASE_URL}/public/venta/iniciar-pago`, { 
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payloadIniciarCompra)
+                body: JSON.stringify(payloadIniciarPago)
             });
 
-            console.log("[handleModalPurchaseSubmit] Respuesta cruda de iniciar-compra:", initResponse);
+            console.log("[handleModalPurchaseSubmit] Respuesta cruda de iniciar-pago:", initResponse); // Línea ~425
             const initData = await initResponse.json();
-            console.log("[handleModalPurchaseSubmit] Datos JSON de iniciar-compra:", initData);
+            console.log("[handleModalPurchaseSubmit] Datos JSON de iniciar-pago:", initData); // Línea ~427
 
-            if (!initResponse.ok) throw new Error(initData.mensaje || `Error al iniciar compra (${initResponse.status})`);
+            if (!initResponse.ok) {
+                const errorMsg = initData.message || initData.mensaje || `Error al iniciar pago (${initResponse.status})`;
+                throw new Error(errorMsg);
+            }
             
-            currentClientSecret = initData.clientSecretStripe;
-            currentIdCompraTemporal = initData.idCompraTemporal;
-            console.log("[handleModalPurchaseSubmit] clientSecret:", currentClientSecret, "idCompraTemporal:", currentIdCompraTemporal);
+            currentClientSecret = initData.clientSecret; 
+            currentIdCompraTemporal = initData.idCompraTemporal; 
+            
+            if (!currentClientSecret) {
+                throw new Error("No se recibió el clientSecret de Stripe desde el backend (iniciar-pago).");
+            }
+            console.log("[handleModalPurchaseSubmit] clientSecret (de iniciar-pago):", currentClientSecret, "idCompraTemporal:", currentIdCompraTemporal); // Línea ~436
 
-
-            // 2. Confirmar Pago con Stripe Elements
             const { paymentIntent, error: stripeError } = await stripe.confirmCardPayment(currentClientSecret, {
                 payment_method: {
                     card: modalCardElement,
-                    billing_details: { name: nombreComprador, email: emailComprador },
+                    billing_details: { name: nombreComprador, email: emailComprador }, 
                 }
             });
 
@@ -443,46 +427,92 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("[handleModalPurchaseSubmit] Error de Stripe al confirmar pago:", stripeError);
                 throw new Error(stripeError.message);
             }
-            console.log("[handleModalPurchaseSubmit] PaymentIntent de Stripe:", paymentIntent);
+            console.log("[handleModalPurchaseSubmit] PaymentIntent de Stripe:", paymentIntent); // Línea ~449
             
-            // 3. Confirmar Compra en el Backend
             if (paymentIntent && paymentIntent.status === 'succeeded') {
-                const payloadConfirmarCompra = {
-                    paymentIntentId: paymentIntent.id,
-                    idCompraTemporal: currentIdCompraTemporal 
-                };
-                console.log("[handleModalPurchaseSubmit] Payload para confirmar-compra-stripe:", JSON.parse(JSON.stringify(payloadConfirmarCompra)));
                 
-                const confirmResponse = await fetch(`${API_BASE_URL}/public/ventas/confirmar-compra-stripe`, {
+                const formDataConfirmar = new URLSearchParams();
+                formDataConfirmar.append('paymentIntentId', paymentIntent.id);
+                formDataConfirmar.append('idFestival', FESTIVAL_ID.toString());         
+                formDataConfirmar.append('idEntrada', currentSelectedTicketType.idEntrada.toString()); 
+                formDataConfirmar.append('cantidad', cantidad.toString());             
+                formDataConfirmar.append('emailAsistente', emailComprador); 
+                formDataConfirmar.append('nombreAsistente', nombreComprador);      
+                
+                if (currentIdCompraTemporal) { 
+                    formDataConfirmar.append('idCompraTemporal', currentIdCompraTemporal);
+                } else {
+                    console.warn("[handleModalPurchaseSubmit] idCompraTemporal es '"+currentIdCompraTemporal+"' y no se está incluyendo en el payload de confirmar-compra para /public/venta/confirmar-compra."); // Línea ~473
+                }
+
+                console.log("[handleModalPurchaseSubmit] Payload (URLSearchParams) para confirmar-compra (CORREGIDO):", formDataConfirmar.toString()); // Línea ~476
+                
+                const confirmResponse = await fetch(`${API_BASE_URL}/public/venta/confirmar-compra`, { // Línea ~479 (antes 454)
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payloadConfirmarCompra)
+                    headers: { 
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    }, 
+                    body: formDataConfirmar 
                 });
                 
-                console.log("[handleModalPurchaseSubmit] Respuesta cruda de confirmar-compra-stripe:", confirmResponse);
-                const entradasAdquiridas = await confirmResponse.json();
-                console.log("[handleModalPurchaseSubmit] Datos JSON de confirmar-compra-stripe (entradas adquiridas):", entradasAdquiridas);
+                console.log("[handleModalPurchaseSubmit] Respuesta cruda de confirmar-compra:", confirmResponse); // Línea ~485 (antes 462)
 
-                if (!confirmResponse.ok) throw new Error(entradasAdquiridas.mensaje || `Error al confirmar compra en servidor (${confirmResponse.status})`);
+                if (!confirmResponse.ok) { // Esto será true para el 400
+                    const errorText = await confirmResponse.text(); // Leer el cuerpo del error
+                    console.error("[handleModalPurchaseSubmit] Error en confirmar-compra. Status:", confirmResponse.status, "Texto:", errorText); // Línea ~466 (antes)
+                    // Intentar parsear el JSON del error si el backend lo envía
+                    let backendErrorMsg = `Error al confirmar compra en servidor (${confirmResponse.status})`;
+                    try {
+                        const jsonError = JSON.parse(errorText);
+                        if (jsonError && (jsonError.error || jsonError.mensaje)) {
+                            backendErrorMsg = jsonError.error || jsonError.mensaje; // Usar el mensaje de error del backend
+                        } else {
+                           backendErrorMsg += ` - ${errorText.substring(0,200)}...`; // Fallback
+                        }
+                    } catch(e) {
+                         // Si no es JSON, usar el texto directamente
+                         backendErrorMsg += ` - ${errorText.substring(0,200)}...`;
+                    }
+                    throw new Error(backendErrorMsg); // Línea ~467 (antes)
+                }
                 
-                displayPurchaseConfirmation(entradasAdquiridas);
+                // Si llegamos aquí, confirmResponse.ok es true (ej. 200 OK)
+                const compraConfirmadaDTO = await confirmResponse.json(); // Línea ~496 
+                console.log("[handleModalPurchaseSubmit] Datos JSON de confirmar-compra (CompraDTO):", compraConfirmadaDTO);
+
+                // *** CORREGIR AQUÍ PARA USAR 'entradasGeneradas' y mapear correctamente los campos ***
+                if (compraConfirmadaDTO && Array.isArray(compraConfirmadaDTO.entradasGeneradas)) { // Cambio aquí
+                    const entradasParaDisplay = compraConfirmadaDTO.entradasGeneradas.map(entradaGenerada => {
+                        // Asumimos que 'entradaGenerada' tiene 'codigoEntrada' y 'nombreTipoEntrada'
+                        // y que 'compraConfirmadaDTO' tiene 'nombreAsistente' y 'emailAsistente'
+                        return {
+                            nombreTipoEntrada: entradaGenerada.nombreTipoEntrada || currentSelectedTicketType.tipo, 
+                            nombreComprador: compraConfirmadaDTO.nombreAsistente, 
+                            emailComprador: compraConfirmadaDTO.emailAsistente,   
+                            codigoEntrada: entradaGenerada.codigoEntrada 
+                        };
+                    });
+                    displayPurchaseConfirmation(entradasParaDisplay);
+                } else { // Línea ~499
+                    console.error("Formato de respuesta JSON inesperado de confirmar-compra (falta 'entradasGeneradas' o no es array):", compraConfirmadaDTO);
+                    throw new Error("Formato de respuesta inesperado del servidor después de confirmar la compra."); // Línea ~500
+                }
                 loadFestivalData(); 
             } else {
                 console.warn("[handleModalPurchaseSubmit] El estado del PaymentIntent de Stripe no fue 'succeeded':", paymentIntent ? paymentIntent.status : 'PaymentIntent nulo');
                 throw new Error("El pago con Stripe no pudo completarse o fue cancelado.");
             }
 
-        } catch (error) {
-            console.error("Error en el proceso de compra (script.js):", error);
+        } catch (error) { // Línea ~509 (antes 541)
+            console.error("Error en el proceso de compra (script.js adaptado):", error);
             modalCardErrors.textContent = error.message || "Ocurrió un error desconocido durante la compra.";
             modalPayButton.disabled = false;
             updateModalTotalPrice(); 
         }
     }
-
-    function displayPurchaseConfirmation(entradasCompradas) {
+    
+    function displayPurchaseConfirmation(entradasCompradas) { 
         if (!modalFormArea || !modalConfirmationArea || !modalPurchasedTicketDetails || !modalPurchasedTicketQr || !modalPaymentForm) return;
-        
         modalFormArea.style.display = 'none';
         modalConfirmationArea.style.display = 'block';
 
@@ -516,7 +546,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         if (!modalPurchasedTicketQr) return;
-
         try {
             const qr = qrcode(0, 'L'); 
             qr.addData(qrText);
@@ -538,10 +567,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modalConfirmationArea) modalConfirmationArea.style.display = 'none';
     }
 
-
-    // =========================================================================
-    // == Inicialización de Componentes UI (Existentes)
-    // =========================================================================
     function initAOS() {
         if (typeof AOS !== 'undefined' && !prefersReducedMotion) {
             AOS.init({ duration: 900, easing: 'ease-out-cubic', once: true, offset: 100 });
@@ -580,18 +605,15 @@ document.addEventListener('DOMContentLoaded', () => {
         let ringX = mouseX, ringY = mouseY, dotX = mouseX, dotY = mouseY;
         const ringSpeed = 0.12; 
         let isCursorVisible = false;
-
         const updateCursor = () => {
             dotX = mouseX; 
             dotY = mouseY;
             ringX += (mouseX - ringX) * ringSpeed; 
             ringY += (mouseY - ringY) * ringSpeed;
-            
             if (!isNaN(dotX) && !isNaN(dotY)) cursorDot.style.transform = `translate(${dotX}px, ${dotY}px) translate(-50%, -50%)`;
             if (!isNaN(ringX) && !isNaN(ringY)) cursorRing.style.transform = `translate(${ringX}px, ${ringY}px) translate(-50%, -50%)`;
             rafIdCursor = requestAnimationFrame(updateCursor);
         };
-
         document.addEventListener('mousemove', (e) => {
             mouseX = e.clientX; 
             mouseY = e.clientY;
@@ -599,10 +621,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 cursorDot.style.opacity = 1; cursorRing.style.opacity = 1; isCursorVisible = true;
             }
         }, { passive: true });
-
         document.addEventListener('mouseleave', () => { if (cursorDot) cursorDot.style.opacity = 0; if (cursorRing) cursorRing.style.opacity = 0; isCursorVisible = false; });
         document.addEventListener('mouseenter', () => { if (cursorDot) cursorDot.style.opacity = 1; if (cursorRing) cursorRing.style.opacity = 1; isCursorVisible = true; });
-        
         updateCursor(); 
     } else if (cursorDot || cursorRing) { 
         if (cursorDot) cursorDot.style.display = 'none';
@@ -751,14 +771,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (modalPaymentForm) modalPaymentForm.addEventListener('submit', handleModalPurchaseSubmit);
     if (purchaseModal) purchaseModal.addEventListener('click', (event) => { if (event.target === purchaseModal) closePurchaseModal(); });
 
-
-    // =========================================================================
-    // == Carga Inicial de Datos del Festival
-    // =========================================================================
     async function loadFestivalData() {
         console.log("Loading festival data (script.js)...");
         if (errorContainer) errorContainer.style.display = 'none'; 
-
         const ticketGridElement = document.getElementById('ticket-grid');
         const loadingTicketsP = document.getElementById('tickets-loading');
         
@@ -775,7 +790,7 @@ document.addEventListener('DOMContentLoaded', () => {
              if (ticketGridElement) {ticketGridElement.innerHTML = ''; ticketGridElement.appendChild(loadingTicketsP);}
         }
 
-        const [festivalData, ticketDataResult] = await Promise.all([ // ticketDataResult no se usa directamente aquí, fetchTicketTypes actualiza la global
+        const [festivalData, ticketDataResultIgnored] = await Promise.all([
             fetchFestivalDetails(FESTIVAL_ID),
             fetchTicketTypes(FESTIVAL_ID) 
         ]);
