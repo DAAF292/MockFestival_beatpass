@@ -7,12 +7,14 @@
  * - /public/venta/confirmar-compra (URLSearchParams, payload completo) - FUNCIONA (Devuelve 200 OK)
  * - CORREGIDO el parseo de la respuesta de confirmar-compra para usar 'entradasGeneradas'.
  * - Se mantienen los logs de depuración.
+ * - CORREGIDO: Mostrar 'codigoQr' en lugar de 'codigoEntrada'.
+ * - CORREGIDO: Usar 'qrCodeImageDataUrl' si viene del DTO, o generar QR si solo viene 'codigoQr'.
  */
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- Configuración ---
-    const API_BASE_URL = 'https://daw2-tfg-beatpass.onrender.com/api'; 
-    const FESTIVAL_ID = 20; 
+    const API_BASE_URL = 'https://daw2-tfg-beatpass.onrender.com/api';
+    const FESTIVAL_ID = 20;
     const CLAVE_PUBLICABLE_STRIPE = 'pk_test_51RLUyq4Et9Src69RTyKKrqn48wubA5QIbS9zTguw8chLB8FGgwMt9sZV6VwvT4UEWE0vnKxaJCNFlj87EY6i9mGK00ggcR1AiX';
 
     // --- Selectores DOM Globales ---
@@ -56,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let modalCardElement = null;
     let currentSelectedTicketType = null;
     let currentClientSecret = null;
-    let currentIdCompraTemporal = null; 
+    let currentIdCompraTemporal = null;
     let tiposDeEntradaGlobal = [];
 
     // =========================================================================
@@ -151,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const nameElement1 = document.getElementById('festival-name-line1');
         if (nameElement1) nameElement1.textContent = festivalData.nombre || 'Nombre del Festival';
         const nameElement2 = document.getElementById('festival-name-line2');
-        if (nameElement2) nameElement2.textContent = ''; 
+        if (nameElement2) nameElement2.textContent = '';
 
         const subtitleElement = document.getElementById('festival-subtitle');
         if (subtitleElement) subtitleElement.textContent = festivalData.descripcion || 'Vive la experiencia';
@@ -161,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const formatDate = (dateString) => {
                 if (!dateString) return '?';
                 try {
-                    const date = new Date(dateString + 'T00:00:00'); 
+                    const date = new Date(dateString + 'T00:00:00');
                     return new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'long' }).format(date);
                 } catch (e) { console.error("Error formateando fecha:", dateString, e); return dateString; }
             };
@@ -183,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (loadingMessageElement) loadingMessageElement.textContent = 'Error al cargar sección de entradas.';
             return;
         }
-        grid.innerHTML = ''; 
+        grid.innerHTML = '';
 
         if (!tiposDeEntradaGlobal || tiposDeEntradaGlobal.length === 0) {
             console.log("No ticket types to display or tiposDeEntradaGlobal is empty.");
@@ -199,10 +201,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 typeof ticket.idEntrada !== 'number' ||
                 typeof ticket.tipo !== 'string' ||
                 typeof ticket.precio !== 'number' ||
-                typeof ticket.descripcion !== 'string' || 
+                typeof ticket.descripcion !== 'string' ||
                 typeof ticket.stock !== 'number') {
                 console.warn(`Saltando ticket [${index}] por datos incompletos o inválidos (props API):`, ticket);
-                return; 
+                return;
             }
 
             const card = document.createElement('article');
@@ -241,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const buyButton = document.createElement('button');
                 buyButton.classList.add('cta-button', 'ticket-buy-action-button');
                 buyButton.dataset.ticketId = ticket.idEntrada;
-                const buttonText = ticket.tipo.split(' ')[0]; 
+                const buttonText = ticket.tipo.split(' ')[0];
                 buyButton.innerHTML = `<span>Comprar ${buttonText}</span>`;
                 buyButton.addEventListener('click', () => openPurchaseModal(ticket.idEntrada));
                 card.appendChild(buyButton);
@@ -255,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (typeof AOS !== 'undefined' && !prefersReducedMotion) {
-            AOS.refreshHard(); 
+            AOS.refreshHard();
         }
     }
 
@@ -267,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('[openPurchaseModal] tiposDeEntradaGlobal al abrir modal:', JSON.parse(JSON.stringify(tiposDeEntradaGlobal)));
         currentSelectedTicketType = tiposDeEntradaGlobal.find(t => t.idEntrada === Number(ticketIdFromAPI));
         console.log('[openPurchaseModal] currentSelectedTicketType después de find:', JSON.parse(JSON.stringify(currentSelectedTicketType)));
-        
+
         if (!currentSelectedTicketType || currentSelectedTicketType.stock <= 0) {
             alert("Este tipo de entrada no está disponible, no se encontró o está agotado.");
             console.warn('[openPurchaseModal] Problema con currentSelectedTicketType o stock:', currentSelectedTicketType);
@@ -284,7 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modalSelectedTicketName.textContent = currentSelectedTicketType.tipo;
         modalSelectedTicketPrice.textContent = currentSelectedTicketType.precio.toFixed(2);
         modalTicketQuantityInput.value = 1;
-        modalTicketQuantityInput.max = currentSelectedTicketType.stock; 
+        modalTicketQuantityInput.max = currentSelectedTicketType.stock;
         updateModalTotalPrice();
 
         if (!stripe) {
@@ -322,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         modalFormArea.style.display = 'block';
         modalConfirmationArea.style.display = 'none';
-        modalPaymentForm.reset(); 
+        modalPaymentForm.reset();
         if(modalCardErrors) modalCardErrors.textContent = '';
     }
 
@@ -343,9 +345,9 @@ document.addEventListener('DOMContentLoaded', () => {
             modalPayButton.disabled = true;
             if (cantidad <= 0 && currentSelectedTicketType.precio > 0) {
                 modalCardErrors.textContent = 'La cantidad debe ser al menos 1.';
-            } else if (cantidad > stockDisponible && stockDisponible > 0) { 
+            } else if (cantidad > stockDisponible && stockDisponible > 0) {
                 modalCardErrors.textContent = `Cantidad máxima disponible: ${stockDisponible}.`;
-            } else if (stockDisponible <= 0 && currentSelectedTicketType.precio > 0) { 
+            } else if (stockDisponible <= 0 && currentSelectedTicketType.precio > 0) {
                 modalCardErrors.textContent = 'Entradas agotadas para este tipo.';
             }
         }
@@ -365,9 +367,9 @@ document.addEventListener('DOMContentLoaded', () => {
             modalCardErrors.textContent = 'Error interno: No se ha seleccionado un tipo de entrada válido para la compra.';
             if(modalPayButton.disabled) {
                  modalPayButton.disabled = false;
-                 updateModalTotalPrice(); 
+                 updateModalTotalPrice();
             }
-            return; 
+            return;
         }
 
         modalPayButton.disabled = true;
@@ -375,25 +377,25 @@ document.addEventListener('DOMContentLoaded', () => {
         modalCardErrors.textContent = '';
 
         const cantidad = parseInt(modalTicketQuantityInput.value);
-        const nombreComprador = modalBuyerNameInput.value.trim(); 
-        const emailComprador = modalBuyerEmailInput.value.trim(); 
+        const nombreComprador = modalBuyerNameInput.value.trim();
+        const emailComprador = modalBuyerEmailInput.value.trim();
 
         if (!nombreComprador || !emailComprador || !/^\S+@\S+\.\S+$/.test(emailComprador) || cantidad <= 0) {
             modalCardErrors.textContent = 'Por favor, completa tu Nombre, Email válido y asegura que la Cantidad sea mayor a 0.';
             modalPayButton.disabled = false;
-            updateModalTotalPrice(); 
+            updateModalTotalPrice();
             return;
         }
-        
+
         const payloadIniciarPago = {
-            idEntrada: currentSelectedTicketType.idEntrada, 
+            idEntrada: currentSelectedTicketType.idEntrada,
             cantidad: cantidad
         };
         console.log("[handleModalPurchaseSubmit] Payload para iniciar-pago (adaptado):", JSON.parse(JSON.stringify(payloadIniciarPago)));
 
         try {
             console.log("[handleModalPurchaseSubmit] Enviando a iniciar-pago (adaptado)...");
-            const initResponse = await fetch(`${API_BASE_URL}/public/venta/iniciar-pago`, { 
+            const initResponse = await fetch(`${API_BASE_URL}/public/venta/iniciar-pago`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payloadIniciarPago)
@@ -407,10 +409,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const errorMsg = initData.message || initData.mensaje || `Error al iniciar pago (${initResponse.status})`;
                 throw new Error(errorMsg);
             }
-            
-            currentClientSecret = initData.clientSecret; 
-            currentIdCompraTemporal = initData.idCompraTemporal; 
-            
+
+            currentClientSecret = initData.clientSecret;
+            currentIdCompraTemporal = initData.idCompraTemporal;
+
             if (!currentClientSecret) {
                 throw new Error("No se recibió el clientSecret de Stripe desde el backend (iniciar-pago).");
             }
@@ -419,7 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const { paymentIntent, error: stripeError } = await stripe.confirmCardPayment(currentClientSecret, {
                 payment_method: {
                     card: modalCardElement,
-                    billing_details: { name: nombreComprador, email: emailComprador }, 
+                    billing_details: { name: nombreComprador, email: emailComprador },
                 }
             });
 
@@ -428,33 +430,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(stripeError.message);
             }
             console.log("[handleModalPurchaseSubmit] PaymentIntent de Stripe:", paymentIntent); // Línea ~449
-            
+
             if (paymentIntent && paymentIntent.status === 'succeeded') {
-                
+
                 const formDataConfirmar = new URLSearchParams();
                 formDataConfirmar.append('paymentIntentId', paymentIntent.id);
-                formDataConfirmar.append('idFestival', FESTIVAL_ID.toString());         
-                formDataConfirmar.append('idEntrada', currentSelectedTicketType.idEntrada.toString()); 
-                formDataConfirmar.append('cantidad', cantidad.toString());             
-                formDataConfirmar.append('emailAsistente', emailComprador); 
-                formDataConfirmar.append('nombreAsistente', nombreComprador);      
-                
-                if (currentIdCompraTemporal) { 
+                formDataConfirmar.append('idFestival', FESTIVAL_ID.toString());
+                formDataConfirmar.append('idEntrada', currentSelectedTicketType.idEntrada.toString());
+                formDataConfirmar.append('cantidad', cantidad.toString());
+                formDataConfirmar.append('emailAsistente', emailComprador);
+                formDataConfirmar.append('nombreAsistente', nombreComprador);
+
+                if (currentIdCompraTemporal) {
                     formDataConfirmar.append('idCompraTemporal', currentIdCompraTemporal);
                 } else {
                     console.warn("[handleModalPurchaseSubmit] idCompraTemporal es '"+currentIdCompraTemporal+"' y no se está incluyendo en el payload de confirmar-compra para /public/venta/confirmar-compra."); // Línea ~473
                 }
 
                 console.log("[handleModalPurchaseSubmit] Payload (URLSearchParams) para confirmar-compra (CORREGIDO):", formDataConfirmar.toString()); // Línea ~476
-                
+
                 const confirmResponse = await fetch(`${API_BASE_URL}/public/venta/confirmar-compra`, { // Línea ~479 (antes 454)
                     method: 'POST',
-                    headers: { 
+                    headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
-                    }, 
-                    body: formDataConfirmar 
+                    },
+                    body: formDataConfirmar
                 });
-                
+
                 console.log("[handleModalPurchaseSubmit] Respuesta cruda de confirmar-compra:", confirmResponse); // Línea ~485 (antes 462)
 
                 if (!confirmResponse.ok) { // Esto será true para el 400
@@ -475,58 +477,61 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     throw new Error(backendErrorMsg); // Línea ~467 (antes)
                 }
-                
+
                 // Si llegamos aquí, confirmResponse.ok es true (ej. 200 OK)
-                const compraConfirmadaDTO = await confirmResponse.json(); // Línea ~496 
+                const compraConfirmadaDTO = await confirmResponse.json(); // Línea ~496
                 console.log("[handleModalPurchaseSubmit] Datos JSON de confirmar-compra (CompraDTO):", compraConfirmadaDTO);
 
-                // *** CORREGIR AQUÍ PARA USAR 'entradasGeneradas' y mapear correctamente los campos ***
-                if (compraConfirmadaDTO && Array.isArray(compraConfirmadaDTO.entradasGeneradas)) { // Cambio aquí
+                // *** CORREGIDO para usar 'entradasGeneradas' y el campo 'codigoQr' ***
+                if (compraConfirmadaDTO && Array.isArray(compraConfirmadaDTO.entradasGeneradas)) {
                     const entradasParaDisplay = compraConfirmadaDTO.entradasGeneradas.map(entradaGenerada => {
-                        // Asumimos que 'entradaGenerada' tiene 'codigoEntrada' y 'nombreTipoEntrada'
-                        // y que 'compraConfirmadaDTO' tiene 'nombreAsistente' y 'emailAsistente'
                         return {
-                            nombreTipoEntrada: entradaGenerada.nombreTipoEntrada || currentSelectedTicketType.tipo, 
-                            nombreComprador: compraConfirmadaDTO.nombreAsistente, 
-                            emailComprador: compraConfirmadaDTO.emailAsistente,   
-                            codigoEntrada: entradaGenerada.codigoEntrada 
+                            nombreTipoEntrada: entradaGenerada.tipoEntradaOriginal || currentSelectedTicketType.tipo, // Usar 'tipoEntradaOriginal' del DTO
+                            nombreComprador: compraConfirmadaDTO.nombreAsistente,
+                            emailComprador: compraConfirmadaDTO.emailAsistente,
+                            codigoQr: entradaGenerada.codigoQr, // Usar 'codigoQr'
+                            qrCodeImageDataUrl: entradaGenerada.qrCodeImageDataUrl // Usar la imagen QR generada por el backend
                         };
                     });
                     displayPurchaseConfirmation(entradasParaDisplay);
-                } else { // Línea ~499
+                } else {
                     console.error("Formato de respuesta JSON inesperado de confirmar-compra (falta 'entradasGeneradas' o no es array):", compraConfirmadaDTO);
-                    throw new Error("Formato de respuesta inesperado del servidor después de confirmar la compra."); // Línea ~500
+                    throw new Error("Formato de respuesta inesperado del servidor después de confirmar la compra.");
                 }
-                loadFestivalData(); 
+                loadFestivalData();
             } else {
                 console.warn("[handleModalPurchaseSubmit] El estado del PaymentIntent de Stripe no fue 'succeeded':", paymentIntent ? paymentIntent.status : 'PaymentIntent nulo');
                 throw new Error("El pago con Stripe no pudo completarse o fue cancelado.");
             }
 
-        } catch (error) { // Línea ~509 (antes 541)
+        } catch (error) {
             console.error("Error en el proceso de compra (script.js adaptado):", error);
             modalCardErrors.textContent = error.message || "Ocurrió un error desconocido durante la compra.";
             modalPayButton.disabled = false;
-            updateModalTotalPrice(); 
+            updateModalTotalPrice();
         }
     }
-    
-    function displayPurchaseConfirmation(entradasCompradas) { 
+
+    function displayPurchaseConfirmation(entradasCompradas) {
         if (!modalFormArea || !modalConfirmationArea || !modalPurchasedTicketDetails || !modalPurchasedTicketQr || !modalPaymentForm) return;
         modalFormArea.style.display = 'none';
         modalConfirmationArea.style.display = 'block';
 
         if (entradasCompradas && entradasCompradas.length > 0) {
-            const primeraEntrada = entradasCompradas[0]; 
+            const primeraEntrada = entradasCompradas[0];
             modalPurchasedTicketDetails.innerHTML = `
                 <p><strong>Tipo:</strong> ${primeraEntrada.nombreTipoEntrada || 'N/A'}</p>
                 <p><strong>Comprador:</strong> ${primeraEntrada.nombreComprador || 'N/A'}</p>
                 <p><strong>Email:</strong> ${primeraEntrada.emailComprador || 'N/A'}</p>
-                <p><strong>Código:</strong> ${primeraEntrada.codigoEntrada || 'N/A'}</p>
+                <p><strong>Código:</strong> ${primeraEntrada.codigoQr || 'N/A'}</p> 
                 ${entradasCompradas.length > 1 ? `<p><em>(y ${entradasCompradas.length -1} entrada(s) más)</em></p>` : ''}`;
-            
-            if (primeraEntrada.codigoEntrada) {
-                 generateAndDisplayModalQR(primeraEntrada.codigoEntrada);
+
+            // Mostrar la imagen QR si la URL de datos está disponible
+            if (primeraEntrada.qrCodeImageDataUrl) {
+                 modalPurchasedTicketQr.src = primeraEntrada.qrCodeImageDataUrl;
+                 modalPurchasedTicketQr.style.display = 'block';
+            } else if (primeraEntrada.codigoQr) { // Si no hay URL de imagen pero sí código, intentar generarla
+                 generateAndDisplayModalQR(primeraEntrada.codigoQr);
             } else {
                 modalPurchasedTicketQr.style.display = 'none';
             }
@@ -534,11 +539,11 @@ document.addEventListener('DOMContentLoaded', () => {
             modalPurchasedTicketDetails.innerHTML = "<p>No se pudieron obtener los detalles de la compra. Por favor, revisa tu email para la confirmación.</p>";
             modalPurchasedTicketQr.style.display = 'none';
         }
-        if(modalCardElement) modalCardElement.clear(); 
-        modalPaymentForm.reset(); 
-        updateModalTotalPrice(); 
+        if(modalCardElement) modalCardElement.clear();
+        modalPaymentForm.reset();
+        updateModalTotalPrice();
     }
-    
+
     function generateAndDisplayModalQR(qrText) {
         if (typeof qrcode === 'undefined') {
             console.error("Librería QRCode (qrcode.min.js) no cargada.");
@@ -547,10 +552,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (!modalPurchasedTicketQr) return;
         try {
-            const qr = qrcode(0, 'L'); 
+            const qr = qrcode(0, 'L');
             qr.addData(qrText);
             qr.make();
-            modalPurchasedTicketQr.src = qr.createDataURL(6, 0); 
+            modalPurchasedTicketQr.src = qr.createDataURL(6, 0);
             modalPurchasedTicketQr.style.display = 'block';
         } catch (e) {
             console.error("Error generando QR:", e);
@@ -560,10 +565,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function closePurchaseModal() {
         if (purchaseModal) purchaseModal.style.display = 'none';
-        if (modalCardElement) modalCardElement.clear(); 
+        if (modalCardElement) modalCardElement.clear();
         if (modalPaymentForm) modalPaymentForm.reset();
-        currentSelectedTicketType = null; 
-        if (modalFormArea) modalFormArea.style.display = 'block'; 
+        currentSelectedTicketType = null;
+        if (modalFormArea) modalFormArea.style.display = 'block';
         if (modalConfirmationArea) modalConfirmationArea.style.display = 'none';
     }
 
@@ -574,78 +579,78 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('AOS animations disabled (prefers-reduced-motion). Applying static styles.');
             document.querySelectorAll('[data-aos]').forEach(el => {
                 el.style.opacity = 1;
-                el.style.transform = 'none'; 
-                el.classList.add('aos-animate'); 
+                el.style.transform = 'none';
+                el.classList.add('aos-animate');
             });
         } else { console.warn('AOS library not found.'); }
     }
 
     function hideLoader() {
-        if (body.classList.contains('loading')) { 
+        if (body.classList.contains('loading')) {
             body.classList.remove('loading');
             if (loader) {
-                loader.classList.add('hidden'); 
+                loader.classList.add('hidden');
                 loader.addEventListener('transitionend', () => loader?.remove(), { once: true });
             }
-            if(!document.querySelector('.aos-animate')) { 
+            if(!document.querySelector('.aos-animate')) {
                 initAOS();
             }
         }
     }
 
     if (loader) {
-        window.addEventListener('load', hideLoader); 
-        setTimeout(hideLoader, 3500); 
+        window.addEventListener('load', hideLoader);
+        setTimeout(hideLoader, 3500);
     } else {
-        initAOS(); 
+        initAOS();
     }
 
     if (cursorDot && cursorRing && window.matchMedia("(pointer: fine)").matches && !prefersReducedMotion) {
         let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
         let ringX = mouseX, ringY = mouseY, dotX = mouseX, dotY = mouseY;
-        const ringSpeed = 0.12; 
+        const ringSpeed = 0.12;
         let isCursorVisible = false;
         const updateCursor = () => {
-            dotX = mouseX; 
+            dotX = mouseX;
             dotY = mouseY;
-            ringX += (mouseX - ringX) * ringSpeed; 
+            ringX += (mouseX - ringX) * ringSpeed;
             ringY += (mouseY - ringY) * ringSpeed;
             if (!isNaN(dotX) && !isNaN(dotY)) cursorDot.style.transform = `translate(${dotX}px, ${dotY}px) translate(-50%, -50%)`;
             if (!isNaN(ringX) && !isNaN(ringY)) cursorRing.style.transform = `translate(${ringX}px, ${ringY}px) translate(-50%, -50%)`;
             rafIdCursor = requestAnimationFrame(updateCursor);
         };
         document.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX; 
+            mouseX = e.clientX;
             mouseY = e.clientY;
-            if (!isCursorVisible) { 
+            if (!isCursorVisible) {
                 cursorDot.style.opacity = 1; cursorRing.style.opacity = 1; isCursorVisible = true;
             }
         }, { passive: true });
         document.addEventListener('mouseleave', () => { if (cursorDot) cursorDot.style.opacity = 0; if (cursorRing) cursorRing.style.opacity = 0; isCursorVisible = false; });
         document.addEventListener('mouseenter', () => { if (cursorDot) cursorDot.style.opacity = 1; if (cursorRing) cursorRing.style.opacity = 1; isCursorVisible = true; });
-        updateCursor(); 
-    } else if (cursorDot || cursorRing) { 
+        updateCursor();
+    } else if (cursorDot || cursorRing) {
         if (cursorDot) cursorDot.style.display = 'none';
         if (cursorRing) cursorRing.style.display = 'none';
-        body.style.cursor = 'default'; 
+        body.style.cursor = 'default';
     }
-    
+
     if (header) {
         const handleHeaderScroll = () => header.classList.toggle('scrolled', window.scrollY > 80);
         window.addEventListener('scroll', debounce(handleHeaderScroll, 10), { passive: true });
-        handleHeaderScroll(); 
+        handleHeaderScroll();
     }
 
     if (menuToggle && navMenu) {
-        const navLinks = navMenu.querySelectorAll('.nav-link'); 
+        const navLinks = navMenu.querySelectorAll('.nav-link');
         menuToggle.addEventListener('click', () => {
             const isActive = navMenu.classList.toggle('active');
             menuToggle.classList.toggle('open');
             menuToggle.setAttribute('aria-expanded', isActive);
-            body.style.overflowY = isActive ? 'hidden' : ''; 
+            body.style.overflowY = isActive ? 'hidden' : '';
         });
         navLinks.forEach(link => link.addEventListener('click', () => {
-            if (navMenu.classList.contains('active')) { 
+            if (navMenu.classList.contains('active')) {
                 navMenu.classList.remove('active');
                 menuToggle.classList.remove('open');
                 menuToggle.setAttribute('aria-expanded', 'false');
@@ -665,35 +670,35 @@ document.addEventListener('DOMContentLoaded', () => {
             const currentActiveId = topEntry ? topEntry.target.getAttribute('id') : null;
             navLiAnchors.forEach(a => a.classList.toggle('active', a.getAttribute('href') === `#${currentActiveId}`));
         };
-        const sectionObserver = new IntersectionObserver(observerCallback, { root: null, rootMargin: '-40% 0px -59% 0px', threshold: 0 }); 
+        const sectionObserver = new IntersectionObserver(observerCallback, { root: null, rootMargin: '-40% 0px -59% 0px', threshold: 0 });
         sections.forEach(section => sectionObserver.observe(section));
     }
-    
+
     if (heroSection && !prefersReducedMotion) {
         const layers = heroSection.querySelectorAll('.hero-bg-layer');
         if (layers.length > 0) {
             let rafParallaxId;
             const handleParallaxScroll = () => {
-                const scrollFactor = window.scrollY * 0.3; 
+                const scrollFactor = window.scrollY * 0.3;
                 layers.forEach(layer => {
                     const speed = parseFloat(layer.getAttribute('data-speed') || '0');
                     layer.style.transform = `translate3d(0, ${scrollFactor * speed}px, 0)`;
                 });
-                rafParallaxId = null; 
+                rafParallaxId = null;
             };
             const debouncedScrollHandler = () => { if (!rafParallaxId) rafParallaxId = requestAnimationFrame(handleParallaxScroll); };
             window.addEventListener('scroll', debouncedScrollHandler, { passive: true });
-            handleParallaxScroll(); 
+            handleParallaxScroll();
         }
     }
 
     if (typeof basicLightbox !== 'undefined') {
         document.body.addEventListener('click', (e) => {
-            const galleryLink = e.target.closest('.gallery-item'); 
+            const galleryLink = e.target.closest('.gallery-item');
             if (galleryLink) {
                 e.preventDefault();
                 const imageUrl = galleryLink.getAttribute('href');
-                if (imageUrl && imageUrl !== '#') { 
+                if (imageUrl && imageUrl !== '#') {
                     try { basicLightbox.create(`<img src="${imageUrl}" alt="Vista ampliada">`, { className: 'rds-lightbox' }).show(); }
                     catch (error) { console.error("Lightbox error:", error); }
                 }
@@ -702,9 +707,9 @@ document.addEventListener('DOMContentLoaded', () => {
     } else { console.warn('basicLightbox library not found.'); }
 
     if (themeToggleButton) {
-        const applyTheme = (theme) => { 
-            body.setAttribute('data-theme', theme); 
-            localStorage.setItem('theme', theme); 
+        const applyTheme = (theme) => {
+            body.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
         };
         const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         applyTheme(savedTheme);
@@ -714,15 +719,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
             const targetId = this.getAttribute('href');
-            if (targetId === '#' || !targetId.startsWith('#')) return; 
-            
+            if (targetId === '#' || !targetId.startsWith('#')) return;
+
             const targetElement = document.querySelector(targetId);
             if (targetElement) {
                 e.preventDefault();
-                const headerOffset = (header ? header.offsetHeight : 0) + 20; 
+                const headerOffset = (header ? header.offsetHeight : 0) + 20;
                 const elementPosition = targetElement.getBoundingClientRect().top;
                 const offsetPosition = window.pageYOffset + elementPosition - headerOffset;
-                
+
                 window.scrollTo({
                     top: offsetPosition,
                     behavior: prefersReducedMotion ? 'auto' : 'smooth'
@@ -739,10 +744,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-    
+
     const checkScrollable = () => {
         if (carousel && carouselWrapper) {
-            const isScrollable = carousel.scrollWidth > carousel.clientWidth + 5; 
+            const isScrollable = carousel.scrollWidth > carousel.clientWidth + 5;
             carouselWrapper.classList.toggle('is-scrollable', isScrollable);
         }
     };
@@ -751,7 +756,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof ResizeObserver !== 'undefined') {
             const resizeObserver = new ResizeObserver(debounce(checkScrollable, 50));
             resizeObserver.observe(carouselWrapper);
-            resizeObserver.observe(carousel); 
+            resizeObserver.observe(carousel);
         } else {
             window.addEventListener('resize', debounce(checkScrollable, 250));
         }
@@ -760,7 +765,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const newsletterLink = document.querySelector('.newsletter-link');
     if (newsletterLink) {
         newsletterLink.addEventListener('click', (e) => {
-            e.preventDefault(); 
+            e.preventDefault();
             alert('Funcionalidad de suscripción no implementada en este prototipo.');
         });
     }
@@ -773,33 +778,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadFestivalData() {
         console.log("Loading festival data (script.js)...");
-        if (errorContainer) errorContainer.style.display = 'none'; 
+        if (errorContainer) errorContainer.style.display = 'none';
         const ticketGridElement = document.getElementById('ticket-grid');
         const loadingTicketsP = document.getElementById('tickets-loading');
-        
-        if (ticketGridElement && !loadingTicketsP) { 
+
+        if (ticketGridElement && !loadingTicketsP) {
             const p = document.createElement('p');
             p.id = 'tickets-loading';
-            p.className = 'text-center col-span-full'; 
-            p.style.gridColumn = '1 / -1'; 
+            p.className = 'text-center col-span-full';
+            p.style.gridColumn = '1 / -1';
             p.textContent = 'Cargando tipos de entrada...';
-            ticketGridElement.innerHTML = ''; 
+            ticketGridElement.innerHTML = '';
             ticketGridElement.appendChild(p);
-        } else if (loadingTicketsP) { 
+        } else if (loadingTicketsP) {
              loadingTicketsP.textContent = 'Cargando tipos de entrada...';
              if (ticketGridElement) {ticketGridElement.innerHTML = ''; ticketGridElement.appendChild(loadingTicketsP);}
         }
 
         const [festivalData, ticketDataResultIgnored] = await Promise.all([
             fetchFestivalDetails(FESTIVAL_ID),
-            fetchTicketTypes(FESTIVAL_ID) 
+            fetchTicketTypes(FESTIVAL_ID)
         ]);
 
         displayFestivalDetails(festivalData);
-        displayTicketTypes(); 
+        displayTicketTypes();
 
         console.log("Festival data loading complete (script.js).");
-        checkScrollable(); 
+        checkScrollable();
     }
 
     loadFestivalData();

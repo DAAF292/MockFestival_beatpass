@@ -1,0 +1,1183 @@
+/* ========================================================================= */
+/* == LUNA NEGRA FEST - FORJA DE LEYENDAS - style.css                     == */
+/* ========================================================================= */
+
+/* ------------------------------------------------------------------------- */
+/* :: Variables CSS LNF                                                     */
+/* ------------------------------------------------------------------------- */
+:root {
+    /* Paleta de Colores Inspirada en la Forja y la Noche */
+    --lnf-bg-darkest: #0d0d0f;         /* Negro volcánico, fondo principal */
+    --lnf-bg-darker: #1a1a1d;          /* Gris metal oscuro, para secciones */
+    --lnf-bg-dark: #2c2c30;            /* Gris acero, para tarjetas y elementos */
+    --lnf-bg-overlay: rgba(13, 13, 15, 0.75); /* Overlay oscuro para hero */
+
+    --lnf-text-light-primary: #e0e0e0;   /* Blanco ceniza, texto principal */
+    --lnf-text-light-secondary: #a0a0a0; /* Gris piedra, texto secundario */
+    --lnf-text-dark-primary: #1a1a1d;     /* Para texto sobre fondos claros (si los hubiera) */
+
+    --lnf-accent-ember: #ff4500;       /* Naranja brasa ardiente, para CTAs y acentos principales */
+    --lnf-accent-ember-darker: #cc3700; /* Naranja brasa para hover/active */
+    --lnf-accent-steel-blue: #6c7a89;  /* Azul acero templado, acentos secundarios */
+    --lnf-accent-gold: #daa520;        /* Oro viejo, para detalles "legendarios" */
+    --lnf-accent-purple-mist: #483D8B; /* Morado niebla mística, opcional */
+
+    --lnf-border-color: #444448;       /* Color para bordes sutiles */
+    --lnf-shadow-color: rgba(0, 0, 0, 0.5); /* Sombra oscura para profundidad */
+
+    /* Tipografía Forjada en Leyendas */
+    --lnf-font-display: 'Cinzel Decorative', serif; /* Títulos principales, épicos */
+    --lnf-font-headings: 'Anton', sans-serif;         /* Cabeceras de sección, impactantes */
+    --lnf-font-body: 'Roboto', sans-serif;            /* Cuerpo de texto, legible */
+    --lnf-font-ui: 'Roboto Condensed', sans-serif;    /* Botones, etiquetas, UI */
+    --lnf-font-accent-text: 'Oswald', sans-serif;     /* Para textos destacados o citas */
+
+    /* Transiciones */
+    --lnf-transition-fast: all 0.2s ease-in-out;
+    --lnf-transition-medium: all 0.3s ease-in-out;
+    --lnf-transition-slow: all 0.5s ease-in-out;
+
+    /* Tamaños y Espaciados */
+    --lnf-header-height: 70px;
+    --lnf-header-height-scrolled: 60px;
+    --lnf-container-padding: 0 20px;
+    --lnf-section-padding: 60px 0;
+    --lnf-card-border-radius: 8px;
+    --lnf-button-border-radius: 5px;
+}
+
+/* ------------------------------------------------------------------------- */
+/* :: Reset Básico y Estilos Globales                                       */
+/* ------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+    font-size: 16px; /* Base para REM */
+    scrollbar-color: var(--lnf-accent-ember) var(--lnf-bg-darker);
+    scrollbar-width: thin;
+}
+
+body {
+    font-family: var(--lnf-font-body);
+    background-color: var(--lnf-bg-darkest);
+    color: var(--lnf-text-light-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body.loading {
+    overflow: hidden;
+}
+
+/* Estilo de scrollbar para Webkit */
+body::-webkit-scrollbar {
+    width: 8px;
+}
+body::-webkit-scrollbar-track {
+    background: var(--lnf-bg-darker);
+}
+body::-webkit-scrollbar-thumb {
+    background-color: var(--lnf-accent-ember);
+    border-radius: 10px;
+    border: 2px solid var(--lnf-bg-darker);
+}
+
+/* ------------------------------------------------------------------------- */
+/* :: Tipografía Base                                                       */
+/* ------------------------------------------------------------------------- */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--lnf-font-headings);
+    color: var(--lnf-text-light-primary);
+    line-height: 1.2;
+    margin-bottom: 1rem;
+    text-shadow: 1px 1px 2px var(--lnf-shadow-color);
+}
+
+h1 { font-size: 3rem; font-family: var(--lnf-font-display); }
+h2 { font-size: 2.5rem; } /* Usado para .section-title-lnf */
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.25rem; }
+
+p {
+    margin-bottom: 1rem;
+    color: var(--lnf-text-light-secondary);
+}
+p strong { color: var(--lnf-text-light-primary); }
+
+a {
+    color: var(--lnf-accent-ember);
+    text-decoration: none;
+    transition: var(--lnf-transition-fast);
+}
+a:hover, a:focus {
+    color: var(--lnf-accent-ember-darker);
+    text-decoration: underline;
+}
+
+img, svg {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+ul { list-style: none; }
+
+/* ------------------------------------------------------------------------- */
+/* :: Contenedores y Layout                                                 */
+/* ------------------------------------------------------------------------- */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: var(--lnf-container-padding);
+}
+
+.container-fluid {
+    width: 100%;
+    padding: var(--lnf-container-padding);
+}
+
+.section-dark-lnf { background-color: var(--lnf-bg-dark); padding: var(--lnf-section-padding); }
+.section-darker-lnf { background-color: var(--lnf-bg-darker); padding: var(--lnf-section-padding); }
+.section-gradient-lnf {
+    background: linear-gradient(180deg, var(--lnf-bg-darker) 0%, var(--lnf-bg-darkest) 100%);
+    padding: var(--lnf-section-padding);
+}
+
+.section-title-lnf {
+    font-family: var(--lnf-font-display);
+    font-size: 2.8rem;
+    margin-bottom: 2rem;
+    color: var(--lnf-accent-gold);
+    text-align: left;
+    position: relative;
+    padding-bottom: 0.5rem;
+}
+.section-title-lnf::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 3px;
+    background-color: var(--lnf-accent-ember);
+    margin-top: 0.5rem;
+}
+.section-title-lnf.centered { text-align: center; }
+.section-title-lnf.centered::after { margin-left: auto; margin-right: auto; }
+.section-title-lnf.alt { color: var(--lnf-text-light-primary); }
+.section-title-lnf.alt::after { background-color: var(--lnf-accent-steel-blue); }
+
+.section-subtitle-lnf {
+    font-family: var(--lnf-font-accent-text);
+    font-size: 1.5rem;
+    color: var(--lnf-text-light-secondary);
+    margin-bottom: 2rem;
+    text-align: center;
+}
+.section-subtitle-lnf.alt { color: var(--lnf-text-light-primary); }
+
+
+/* ------------------------------------------------------------------------- */
+/* :: Loader LNF (#lnf-loader)                                              */
+/* ------------------------------------------------------------------------- */
+.loader-lnf {
+    position: fixed;
+    inset: 0;
+    background-color: var(--lnf-bg-darkest);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+}
+.loader-lnf.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+.loader-lnf-icon svg {
+    width: 120px; /* Ajustado del HTML que dice 100 */
+    height: 120px;
+}
+.loader-triangle-outline {
+    stroke-dasharray: 150;
+    stroke-dashoffset: 150;
+    animation: drawStroke 1.5s ease-in-out forwards;
+}
+.loader-triangle-fill {
+    opacity: 0;
+    animation: fillShape 1s ease-in-out 1s forwards;
+}
+.loader-text-lnf {
+    opacity: 0;
+    animation: fadeInText 1s ease-in-out 1.8s forwards;
+    font-family: var(--lnf-font-headings);
+    font-size: 14px; /* Ajustado */
+    fill: var(--lnf-text-light-primary);
+}
+
+@keyframes drawStroke {
+    to { stroke-dashoffset: 0; }
+}
+@keyframes fillShape {
+    to { opacity: 1; }
+}
+@keyframes fadeInText {
+    to { opacity: 1; }
+}
+
+/* ------------------------------------------------------------------------- */
+/* :: Cursor Personalizado LNF (#cursor-dot, #cursor-ring)                  */
+/* ------------------------------------------------------------------------- */
+#cursor-dot, #cursor-ring {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 10000;
+    opacity: 0; /* Se activa por JS */
+    transition: opacity 0.3s ease-out, transform 0.1s ease-out;
+}
+#cursor-dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--lnf-accent-ember);
+    border-radius: 50%;
+}
+#cursor-ring {
+    width: 30px;
+    height: 30px;
+    border: 2px solid var(--lnf-accent-steel-blue);
+    border-radius: 50%;
+    transition: opacity 0.3s ease-out, transform 0.2s ease-out; /* Ring más suave */
+}
+/* Clases para hover en elementos interactivos (añadir con JS si se desea) */
+body.cursor-pointer #cursor-ring {
+    transform: scale(1.5);
+    border-color: var(--lnf-accent-ember);
+}
+body.cursor-text #cursor-ring {
+    width: 5px;
+    height: 25px;
+    border-radius: 2px;
+}
+
+/* ------------------------------------------------------------------------- */
+/* :: Header LNF (#main-header-lnf)                                         */
+/* ------------------------------------------------------------------------- */
+.main-header-lnf {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--lnf-header-height);
+    background-color: transparent; /* Inicia transparente */
+    z-index: 1000;
+    transition: var(--lnf-transition-medium);
+    padding: 0; /* El container interno ya tiene padding */
+}
+.main-header-lnf.scrolled {
+    background-color: rgba(26, 26, 29, 0.9); /* --lnf-bg-darker con alpha */
+    height: var(--lnf-header-height-scrolled);
+    box-shadow: 0 2px 10px var(--lnf-shadow-color);
+}
+.header-lnf-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+}
+.logo-lnf {
+    font-family: var(--lnf-font-display);
+    font-size: 2.2rem;
+    color: var(--lnf-text-light-primary);
+    text-decoration: none;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+.logo-lnf:hover {
+    color: var(--lnf-accent-ember);
+}
+
+/* Navegación Principal LNF */
+.main-nav-lnf ul {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+.nav-link-lnf {
+    font-family: var(--lnf-font-ui);
+    font-size: 1rem;
+    color: var(--lnf-text-light-secondary);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 5px 0;
+    position: relative;
+    overflow: hidden; /* Para el efecto del span */
+}
+.nav-link-lnf span {
+    display: inline-block;
+    transition: var(--lnf-transition-medium);
+}
+.nav-link-lnf::before { /* Línea inferior animada */
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--lnf-accent-ember);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: var(--lnf-transition-medium);
+}
+.nav-link-lnf:hover span,
+.nav-link-lnf.active span {
+    color: var(--lnf-text-light-primary);
+    transform: translateY(-2px); /* Pequeño salto */
+}
+.nav-link-lnf:hover::before,
+.nav-link-lnf.active::before {
+    transform: scaleX(1);
+}
+/* Efecto data-text (opcional si quieres usarlo como en el HTML) */
+.nav-link-lnf:hover span::after { /* Ejemplo, puedes modificarlo */
+    content: attr(data-text);
+    position: absolute;
+    top: 100%;
+    left: 0;
+    opacity: 0;
+    transform: translateY(5px);
+    transition: var(--lnf-transition-medium);
+}
+.nav-link-lnf:hover span:hover::after {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+/* Botón de menú hamburguesa */
+#menu-toggle-lnf {
+    display: none; /* Se mostrará en mobile */
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    z-index: 1001; /* Encima del nav */
+}
+#menu-toggle-lnf span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background-color: var(--lnf-text-light-primary);
+    margin: 5px 0;
+    transition: var(--lnf-transition-medium);
+    border-radius: 2px;
+}
+#menu-toggle-lnf.open span:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+}
+#menu-toggle-lnf.open span:nth-child(2) {
+    opacity: 0;
+}
+#menu-toggle-lnf.open span:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+}
+
+.header-controls-lnf .header-cta-lnf {
+    font-size: 0.9rem;
+    padding: 0.6rem 1.2rem;
+}
+
+/* ------------------------------------------------------------------------- */
+/* :: Botones CTA LNF (.cta-button-lnf)                                     */
+/* ------------------------------------------------------------------------- */
+.cta-button-lnf {
+    display: inline-block;
+    font-family: var(--lnf-font-ui);
+    background-color: var(--lnf-accent-ember);
+    color: var(--lnf-bg-darkest); /* Texto oscuro sobre fondo brillante */
+    padding: 0.8rem 1.8rem;
+    border: 2px solid var(--lnf-accent-ember);
+    border-radius: var(--lnf-button-border-radius);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    transition: var(--lnf-transition-medium);
+    box-shadow: 0 4px 15px rgba(255, 69, 0, 0.3);
+}
+.cta-button-lnf span {
+    position: relative;
+    z-index: 2;
+}
+.cta-button-lnf::before { /* Efecto de "forja" al pasar el ratón */
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background-color: var(--lnf-accent-ember-darker);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease-out, height 0.4s ease-out; /* Duración más larga */
+    z-index: 0;
+}
+.cta-button-lnf:hover, .cta-button-lnf:focus {
+    background-color: var(--lnf-accent-ember-darker);
+    border-color: var(--lnf-accent-ember-darker);
+    color: var(--lnf-text-light-primary); /* Texto claro sobre fondo más oscuro */
+    box-shadow: 0 6px 20px rgba(255, 69, 0, 0.5);
+    text-decoration: none;
+}
+.cta-button-lnf:hover::before {
+    width: 250%; /* Debe ser lo suficientemente grande para cubrir el botón */
+    height: 250%;
+}
+
+.cta-button-lnf.large {
+    padding: 1rem 2.5rem;
+    font-size: 1.2rem;
+}
+.cta-button-lnf.secondary {
+    background-color: transparent;
+    color: var(--lnf-accent-steel-blue);
+    border-color: var(--lnf-accent-steel-blue);
+    box-shadow: none;
+}
+.cta-button-lnf.secondary:hover, .cta-button-lnf.secondary:focus {
+    background-color: var(--lnf-accent-steel-blue);
+    border-color: var(--lnf-accent-steel-blue);
+    color: var(--lnf-text-light-primary);
+    box-shadow: 0 4px 15px rgba(108, 122, 137, 0.3);
+}
+.cta-button-lnf:disabled {
+    background-color: var(--lnf-text-light-secondary);
+    border-color: var(--lnf-text-light-secondary);
+    color: var(--lnf-bg-dark);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+.cta-button-lnf:disabled:hover::before {
+    width: 0;
+    height: 0;
+}
+
+/* ------------------------------------------------------------------------- */
+/* :: Sección Hero LNF (#hero-lnf)                                          */
+/* ------------------------------------------------------------------------- */
+.hero-section-lnf {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    padding-top: var(--lnf-header-height); /* Espacio para el header fijo */
+}
+.hero-background { /* Para imagen o video de fondo */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('https://picsum.photos/seed/lunafestbg/1920/1080') no-repeat center center/cover; /* Placeholder */
+    /* background: url('imagenes/luna-negra/hero-background.jpg') no-repeat center center/cover; */ /* Imagen real */
+    z-index: 1;
+    filter: brightness(0.6) contrast(1.1); /* Oscurecer y dar contraste */
+}
+.hero-overlay { /* Overlay de color o gradiente */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--lnf-bg-overlay);
+    /* O un gradiente: */
+    /* background: linear-gradient(to bottom, rgba(13,13,15,0.5) 0%, rgba(13,13,15,0.9) 100%); */
+    z-index: 2;
+}
+.hero-content-container-lnf {
+    position: relative;
+    z-index: 3;
+}
+.main-title-lnf {
+    font-family: var(--lnf-font-display);
+    font-size: clamp(3rem, 8vw, 6.5rem); /* Responsive font size */
+    color: var(--lnf-text-light-primary);
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 8px var(--lnf-shadow-color);
+}
+.main-title-lnf .title-line-lnf {
+    display: block;
+}
+.subtitle-text-lnf { /* Este es el subtítulo "Forja de Leyendas" */
+    font-family: var(--lnf-font-accent-text);
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    color: var(--lnf-accent-gold); /* Dorado para "Leyendas" */
+    letter-spacing: 1px;
+    margin-bottom: 1.5rem;
+    display: block; /* Asegurar que es un bloque */
+}
+.dates-lnf {
+    font-family: var(--lnf-font-ui);
+    font-size: clamp(1rem, 2.5vw, 1.4rem);
+    color: var(--lnf-text-light-secondary);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 2.5rem;
+}
+.hero-cta-group-lnf .cta-button-lnf {
+    box-shadow: 0 5px 20px rgba(255, 69, 0, 0.4);
+}
+
+/* ------------------------------------------------------------------------- */
+/* :: Sección Manifesto LNF (#manifesto-lnf)                               */
+/* ------------------------------------------------------------------------- */
+#manifesto-lnf {
+    text-align: center;
+}
+#manifesto-lnf .section-title-lnf.alt {
+    font-size: 2rem;
+    color: var(--lnf-accent-ember);
+}
+#manifesto-lnf p {
+    font-family: var(--lnf-font-accent-text);
+    font-size: 1.3rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    color: var(--lnf-text-light-primary);
+    line-height: 1.8;
+}
+
+/* ------------------------------------------------------------------------- */
+/* :: Sección Lineup LNF (#lineup-lnf)                                      */
+/* ------------------------------------------------------------------------- */
+.artist-grid-lnf {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin-bottom: 2.5rem;
+}
+.artist-card-lnf {
+    background-color: var(--lnf-bg-dark);
+    border-radius: var(--lnf-card-border-radius);
+    overflow: hidden;
+    box-shadow: 0 5px 15px var(--lnf-shadow-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid var(--lnf-border-color);
+}
+.artist-card-lnf:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+}
+.artist-image-wrapper-lnf {
+    width: 100%;
+    height: 250px; /* Altura fija para las imágenes */
+    overflow: hidden;
+}
+.artist-image-wrapper-lnf img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Asegura que la imagen cubra sin deformarse */
+    transition: transform 0.5s ease;
+}
+.artist-card-lnf:hover .artist-image-wrapper-lnf img {
+    transform: scale(1.1);
+}
+.artist-info-lnf {
+    padding: 20px;
+    text-align: center;
+}
+.artist-info-lnf h3 {
+    font-family: var(--lnf-font-headings);
+    font-size: 1.8rem;
+    color: var(--lnf-accent-ember);
+    margin-bottom: 0.5rem;
+}
+.artist-info-lnf p {
+    font-family: var(--lnf-font-ui);
+    font-size: 0.9rem;
+    color: var(--lnf-text-light-secondary);
+    margin-bottom: 1rem;
+    min-height: 2.7rem; /* Para alinear si hay descripciones de diferente longitud */
+}
+.stage-tag-lnf {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    font-family: var(--lnf-font-ui);
+    font-size: 0.8rem;
+    border-radius: 15px;
+    font-weight: 700;
+}
+.stage-tag-lnf.main-stage {
+    background-color: var(--lnf-accent-gold);
+    color: var(--lnf-bg-darkest);
+}
+.stage-tag-lnf.secondary-stage {
+    background-color: var(--lnf-accent-steel-blue);
+    color: var(--lnf-text-light-primary);
+}
+.lineup-full-link-lnf {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+/* ------------------------------------------------------------------------- */
+/* :: Sección Tickets LNF (#tickets-lnf)                                    */
+/* ------------------------------------------------------------------------- */
+.ticket-grid-lnf {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-bottom: 1.5rem;
+}
+#tickets-loading-lnf {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-size: 1.2rem;
+    color: var(--lnf-text-light-secondary);
+    padding: 2rem 0;
+}
+.ticket-card-lnf {
+    background-color: var(--lnf-bg-darker);
+    border: 2px solid var(--lnf-border-color);
+    border-radius: var(--lnf-card-border-radius);
+    padding: 25px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: var(--lnf-transition-medium);
+    box-shadow: 0 0 0px var(--lnf-accent-ember); /* Sombra inicial sutil */
+}
+.ticket-card-lnf:hover {
+    border-color: var(--lnf-accent-ember);
+    box-shadow: 0 0 15px var(--lnf-accent-ember), inset 0 0 10px rgba(255,69,0,0.3);
+    transform: translateY(-5px);
+}
+.ticket-icon-lnf { /* Para el SVG de placeholder */
+    font-size: 3rem; /* Controla el tamaño del SVG */
+    color: var(--lnf-accent-ember);
+    margin-bottom: 1rem;
+}
+.ticket-card-lnf h3 {
+    font-family: var(--lnf-font-headings);
+    font-size: 1.6rem;
+    color: var(--lnf-text-light-primary);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+}
+.ticket-card-lnf p { /* Descripción del ticket */
+    font-size: 0.95rem;
+    color: var(--lnf-text-light-secondary);
+    margin-bottom: 1rem;
+    flex-grow: 1; /* Para que el botón quede abajo */
+}
+.ticket-price-lnf {
+    font-family: var(--lnf-font-display);
+    font-size: 2.5rem;
+    color: var(--lnf-accent-gold);
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+.ticket-stock-lnf {
+    font-family: var(--lnf-font-ui);
+    font-size: 0.9rem;
+    color: var(--lnf-accent-steel-blue);
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+}
+.ticket-buy-action-lnf { width: 100%; }
+
+.ticket-soldout-message-lnf {
+    font-family: var(--lnf-font-headings);
+    color: var(--lnf-accent-ember);
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    margin-top: 1rem;
+    border: 2px dashed var(--lnf-accent-ember);
+    padding: 0.5rem;
+}
+.ticket-disclaimer-lnf {
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--lnf-text-light-secondary);
+    margin-top: 2rem;
+}
+
+/* ------------------------------------------------------------------------- */
+/* :: Sección Experience LNF (#experience-lnf)                             */
+/* ------------------------------------------------------------------------- */
+.experience-grid-lnf {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+}
+.experience-item-lnf {
+    background-color: var(--lnf-bg-dark);
+    padding: 25px;
+    border-radius: var(--lnf-card-border-radius);
+    text-align: center;
+    border: 1px solid var(--lnf-border-color);
+    transition: var(--lnf-transition-medium);
+}
+.experience-item-lnf:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 20px var(--lnf-shadow-color);
+    border-color: var(--lnf-accent-steel-blue);
+}
+.experience-icon-lnf {
+    font-size: 3.5rem; /* Controla el tamaño del SVG */
+    color: var(--lnf-accent-steel-blue);
+    margin-bottom: 1.5rem;
+    display: inline-block; /* Para centrar */
+}
+.experience-item-lnf h3 {
+    font-family: var(--lnf-font-headings);
+    font-size: 1.5rem;
+    color: var(--lnf-text-light-primary);
+    margin-bottom: 0.75rem;
+}
+.experience-item-lnf p {
+    font-size: 0.95rem;
+    color: var(--lnf-text-light-secondary);
+}
+
+/* ------------------------------------------------------------------------- */
+/* :: Sección Location LNF (#location-lnf)                                  */
+/* ------------------------------------------------------------------------- */
+.location-container-lnf {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+}
+.location-text-content-lnf .section-title-lnf {
+    font-size: 2.2rem; /* Un poco más pequeño por el layout */
+}
+.location-buttons-lnf {
+    margin-top: 2rem;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap; /* Para que los botones se ajusten en pantallas pequeñas */
+}
+.location-map-placeholder-lnf iframe {
+    width: 100%;
+    height: 400px;
+    border-radius: var(--lnf-card-border-radius);
+    border: 2px solid var(--lnf-border-color);
+    filter: grayscale(80%) contrast(1.1) brightness(0.9); /* Estilo "oscuro" para el mapa */
+    transition: var(--lnf-transition-medium);
+}
+.location-map-placeholder-lnf iframe:hover {
+    filter: grayscale(0%) contrast(1) brightness(1);
+}
+
+/* ------------------------------------------------------------------------- */
+/* :: Sección Connect LNF (#connect-lnf)                                    */
+/* ------------------------------------------------------------------------- */
+.connect-container-lnf { text-align: center; }
+#connect-lnf .section-title-lnf.alt {
+    color: var(--lnf-accent-ember);
+    margin-bottom: 1rem;
+}
+#connect-lnf .section-subtitle-lnf.alt {
+    margin-bottom: 2.5rem;
+}
+.social-icons-large-lnf {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+}
+.social-icons-large-lnf a {
+    font-family: var(--lnf-font-headings);
+    font-size: 1.8rem;
+    color: var(--lnf-text-light-secondary);
+    padding: 10px 15px;
+    border: 2px solid var(--lnf-border-color);
+    border-radius: 50%; /* Círculos */
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: var(--lnf-transition-medium);
+}
+.social-icons-large-lnf a:hover {
+    color: var(--lnf-accent-ember);
+    border-color: var(--lnf-accent-ember);
+    background-color: rgba(255,69,0,0.1);
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* ------------------------------------------------------------------------- */
+/* :: Footer LNF (#main-footer-lnf)                                         */
+/* ------------------------------------------------------------------------- */
+.footer-container-lnf {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 30px;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+}
+.footer-title-lnf {
+    font-family: var(--lnf-font-headings);
+    font-size: 1.3rem;
+    color: var(--lnf-accent-gold);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+}
+.footer-column-lnf p,
+.footer-column-lnf ul li {
+    font-size: 0.9rem;
+    color: var(--lnf-text-light-secondary);
+    margin-bottom: 0.5rem;
+}
+.footer-link-lnf {
+    color: var(--lnf-text-light-secondary);
+    text-decoration: none;
+}
+.footer-link-lnf:hover {
+    color: var(--lnf-text-light-primary);
+    text-decoration: underline;
+}
+.footer-social-icons-lnf {
+    display: flex;
+    gap: 15px;
+}
+.footer-social-icons-lnf a {
+    font-family: var(--lnf-font-ui);
+    color: var(--lnf-text-light-secondary);
+    font-size: 1rem;
+    border: 1px solid var(--lnf-border-color);
+    padding: 5px 8px;
+    border-radius: var(--lnf-button-border-radius);
+    text-decoration: none;
+}
+.footer-social-icons-lnf a:hover {
+    color: var(--lnf-accent-ember);
+    border-color: var(--lnf-accent-ember);
+}
+.footer-bottom-lnf {
+    text-align: center;
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--lnf-border-color);
+    font-size: 0.85rem;
+    color: var(--lnf-text-light-secondary);
+}
+.footer-bottom-lnf p { margin-bottom: 0; }
+
+/* ------------------------------------------------------------------------- */
+/* :: Modal de Compra LNF (#purchase-modal)                                 */
+/* ------------------------------------------------------------------------- */
+.purchase-modal-lnf {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(13, 13, 15, 0.85); /* Fondo oscuro semitransparente */
+    z-index: 2000;
+    display: flex; /* Se controla por JS */
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    overflow-y: auto;
+}
+.purchase-modal-content-lnf {
+    background-color: var(--lnf-bg-darker);
+    padding: 30px;
+    border-radius: var(--lnf-card-border-radius);
+    border: 1px solid var(--lnf-border-color);
+    width: 100%;
+    max-width: 550px;
+    position: relative;
+    box-shadow: 0 10px 30px var(--lnf-shadow-color);
+    animation: modalFadeIn 0.3s ease-out;
+}
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.modal-close-button-lnf {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: var(--lnf-text-light-secondary);
+    font-size: 1.8rem;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+    padding: 5px;
+}
+.modal-close-button-lnf:hover {
+    color: var(--lnf-accent-ember);
+}
+.modal-title-lnf {
+    font-family: var(--lnf-font-display);
+    font-size: 1.8rem;
+    color: var(--lnf-accent-gold);
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+.ticket-info-lnf {
+    font-size: 1rem;
+    color: var(--lnf-text-light-secondary);
+    margin-bottom: 0.5rem;
+}
+.ticket-info-lnf strong {
+    color: var(--lnf-text-light-primary);
+}
+.payment-form-lnf .form-group-lnf {
+    margin-bottom: 1.2rem;
+}
+.form-label-lnf {
+    display: block;
+    font-family: var(--lnf-font-ui);
+    color: var(--lnf-text-light-secondary);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+.form-input-lnf {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    background-color: var(--lnf-bg-dark);
+    border: 1px solid var(--lnf-border-color);
+    border-radius: var(--lnf-button-border-radius);
+    color: var(--lnf-text-light-primary);
+    font-family: var(--lnf-font-body);
+    font-size: 1rem;
+    transition: var(--lnf-transition-fast);
+}
+.form-input-lnf:focus {
+    outline: none;
+    border-color: var(--lnf-accent-ember);
+    box-shadow: 0 0 8px rgba(255,69,0,0.3);
+}
+.form-input-lnf::placeholder {
+    color: var(--lnf-text-light-secondary);
+    opacity: 0.7;
+}
+.total-price-info-lnf {
+    font-size: 1.2rem;
+    margin: 1.5rem 0;
+    text-align: right;
+    color: var(--lnf-text-light-secondary);
+}
+.total-price-info-lnf strong {
+    font-family: var(--lnf-font-headings);
+    font-size: 1.5rem;
+    color: var(--lnf-accent-gold);
+}
+/* Stripe Element Styling */
+.stripe-card-element-lnf {
+    padding: 0.8rem 1rem;
+    background-color: var(--lnf-bg-dark);
+    border: 1px solid var(--lnf-border-color);
+    border-radius: var(--lnf-button-border-radius);
+}
+.stripe-errors-lnf {
+    color: var(--lnf-accent-ember);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    min-height: 1.2em; /* Para evitar saltos de layout */
+}
+.pay-button-lnf {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+/* Confirmación de Compra en Modal */
+.confirmation-area-lnf {
+    text-align: center;
+}
+.confirmation-title-lnf {
+    font-family: var(--lnf-font-display);
+    font-size: 2rem;
+    color: var(--lnf-accent-gold);
+    margin-bottom: 1rem;
+}
+.confirmation-area-lnf p {
+    color: var(--lnf-text-light-secondary);
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+}
+.purchased-ticket-info-lnf {
+    background-color: var(--lnf-bg-dark);
+    padding: 15px;
+    border-radius: var(--lnf-card-border-radius);
+    margin-bottom: 1.5rem;
+    text-align: left;
+    border: 1px solid var(--lnf-border-color);
+}
+.purchased-ticket-info-lnf p {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+.qr-code-image-lnf {
+    max-width: 180px;
+    margin: 0 auto 1.5rem auto;
+    border: 5px solid var(--lnf-text-light-primary);
+    border-radius: var(--lnf-card-border-radius);
+    background-color: white; /* Para que el QR sea legible */
+    padding: 5px; /* Si el QR no tiene margen propio */
+}
+#modal-confirmation-area .cta-button-lnf.secondary {
+    width: 100%;
+}
+
+/* ------------------------------------------------------------------------- */
+/* :: Contenedor de Errores LNF (#error-container-lnf)                      */
+/* ------------------------------------------------------------------------- */
+.error-container-lnf {
+    background-color: var(--lnf-accent-ember);
+    color: var(--lnf-text-light-primary);
+    padding: 1rem;
+    text-align: center;
+    font-family: var(--lnf-font-ui);
+    font-weight: 700;
+    position: fixed; /* o 'sticky' si prefieres */
+    top: var(--lnf-header-height-scrolled); /* Debajo del header si está scrolleado */
+    left: 0;
+    width: 100%;
+    z-index: 1500; /* Encima de contenido, debajo de modal */
+    box-shadow: 0 2px 5px var(--lnf-shadow-color);
+    display: none; /* Se muestra por JS */
+}
+
+
+/* ========================================================================= */
+/* == Media Queries para Responsividad LNF                                 == */
+/* ========================================================================= */
+
+/* Tablets y dispositivos medianos (ej. iPads en horizontal) */
+@media (max-width: 992px) {
+    :root {
+        --lnf-header-height: 60px;
+        --lnf-header-height-scrolled: 55px;
+    }
+    .section-title-lnf { font-size: 2.2rem; }
+    h1 { font-size: 2.5rem; }
+
+    .main-nav-lnf ul { gap: 15px; }
+    .nav-link-lnf { font-size: 0.9rem; }
+
+    .location-container-lnf {
+        grid-template-columns: 1fr; /* Stack en tablets */
+    }
+    .location-text-content-lnf { order: 1; } /* Texto primero */
+    .location-map-placeholder-lnf { order: 2; margin-top: 2rem;}
+}
+
+/* Móviles y dispositivos pequeños (ej. smartphones) */
+@media (max-width: 768px) {
+    h1, .main-title-lnf { font-size: clamp(2.5rem, 10vw, 3.5rem); }
+    .subtitle-text-lnf { font-size: clamp(1.2rem, 5vw, 1.8rem); }
+    .section-title-lnf { font-size: 2rem; }
+
+    /* Menú Hamburguesa */
+    #menu-toggle-lnf { display: block; }
+    .main-nav-lnf {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background-color: var(--lnf-bg-darker);
+        transform: translateX(-100%);
+        transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        padding-top: calc(var(--lnf-header-height) + 20px); /* Espacio para el header */
+        z-index: 999; /* Debajo del toggle pero encima del resto */
+        overflow-y: auto;
+    }
+    .main-nav-lnf.active {
+        transform: translateX(0);
+    }
+    .main-nav-lnf ul {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center; /* Centrar verticalmente si el contenido es poco */
+        gap: 10px; /* Más espacio entre items */
+        width: 100%;
+        padding: 2rem;
+    }
+    .main-nav-lnf ul li { width: 100%; text-align: center; }
+    .nav-link-lnf {
+        font-size: 1.5rem; /* Más grande para tap */
+        padding: 15px 10px;
+        display: block; /* Ocupar todo el ancho del li */
+        width: 100%;
+        color: var(--lnf-text-light-primary); /* Color base más visible en menú móvil */
+    }
+    .nav-link-lnf:hover, .nav-link-lnf.active {
+        background-color: rgba(255,69,0,0.1); /* Fondo al pasar el ratón */
+        color: var(--lnf-accent-ember);
+    }
+    .nav-link-lnf::before { display: none; } /* Ocultar línea animada en móvil */
+
+    .header-controls-lnf {
+        display: none; /* Ocultar el CTA del header, quizás moverlo al menú */
+    }
+
+    .artist-grid-lnf,
+    .ticket-grid-lnf,
+    .experience-grid-lnf {
+        grid-template-columns: 1fr; /* Una columna en móviles */
+        gap: 20px;
+    }
+    .artist-image-wrapper-lnf { height: 220px; }
+
+    .footer-container-lnf {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    .footer-social-icons-lnf { justify-content: center; }
+
+    .purchase-modal-content-lnf {
+        padding: 20px;
+        margin: 10px; /* Espacio para no pegar a los bordes */
+        max-height: 90vh; /* Asegurar que no sea más alto que la pantalla */
+    }
+    .modal-title-lnf { font-size: 1.5rem; }
+}
+
+/* Ajustes para pantallas muy pequeñas */
+@media (max-width: 480px) {
+    .hero-section-lnf { padding-top: calc(var(--lnf-header-height) + 10px); }
+    .main-title-lnf { font-size: 2.2rem; }
+    .subtitle-text-lnf { font-size: 1rem; }
+    .dates-lnf { font-size: 0.9rem; }
+
+    .location-buttons-lnf .cta-button-lnf {
+        width: 100%; /* Botones de ubicación a ancho completo */
+        margin-bottom: 10px;
+    }
+    .location-buttons-lnf .cta-button-lnf:last-child { margin-bottom: 0; }
+
+    .social-icons-large-lnf a {
+        font-size: 1.5rem;
+        width: 50px;
+        height: 50px;
+        gap: 15px;
+    }
+}
