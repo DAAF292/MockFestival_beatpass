@@ -1,0 +1,546 @@
+/* Estilos base y layout */
+:root {
+    /* Paleta Beatpass (ejemplo simplificado, usa tus variables de output.css si es posible) */
+    --bp-color-indigo-50: #eef2ff;
+    --bp-color-indigo-100: #e0e7ff;
+    --bp-color-indigo-200: #c7d2fe;
+    --bp-color-indigo-500: #6366f1; /* Para :focus */
+    --bp-color-indigo-600: #4f46e5;
+    --bp-color-indigo-700: #4338ca;
+    --bp-color-indigo-800: #3730a3;
+
+    --bp-color-red-100: #fee2e2;
+    --bp-color-red-300: #fca5a5;
+    --bp-color-red-700: #b91c1c;
+    --bp-color-red-800: #991b1b;
+    --bp-color-red-900: #7f1d1d;
+    
+    --bp-color-green-50: #f0fdf4;
+    --bp-color-green-100: #dcfce7;
+    --bp-color-green-200: #bbf7d0; /* Añadido para consistencia */
+    --bp-color-green-300: #86efac; /* Añadido para consistencia */
+    --bp-color-green-600: #059669;
+    --bp-color-green-700: #047857;
+    --bp-color-green-800: #065f46;
+    --bp-color-green-900: #064e3b;
+
+    --bp-color-blue-50: #eff6ff;
+    --bp-color-blue-100: #dbeafe;
+    --bp-color-blue-200: #bfdbfe;
+    --bp-color-blue-300: #93c5fd; /* Añadido para consistencia */
+    --bp-color-blue-600: #2563eb;
+    --bp-color-blue-700: #1d4ed8;
+    --bp-color-blue-800: #1e40af;
+    --bp-color-blue-900: #1e3a8a;
+    
+    --bp-color-gray-50: #f9fafb;
+    --bp-color-gray-100: #f3f4f6;
+    --bp-color-gray-200: #e5e7eb;
+    --bp-color-gray-300: #d1d5db;
+    --bp-color-gray-400: #9ca3af;
+    --bp-color-gray-500: #6b7280; /* Añadido para consistencia */
+    --bp-color-gray-600: #4b5563; 
+    --bp-color-gray-700: #374151;
+    --bp-color-gray-800: #1f2937;
+    --bp-color-gray-900: #111827;
+    --bp-color-white: #ffffff;
+    --bp-color-black: #000000;
+
+    /* Nuevas variables para paletas */
+    /* Sunset Orange */
+    --bp-color-orange-50: #fff7ed;
+    --bp-color-orange-100: #ffedd5;
+    --bp-color-orange-300: #fdba74;
+    --bp-color-orange-500: #f97316;
+    --bp-color-orange-700: #c2410c;
+
+    /* Neon Nights */
+    --bp-color-night-blue-800: #1e293b; 
+    --bp-color-night-blue-900: #0f172a; 
+    --bp-color-fuchsia-500: #d946ef;
+    --bp-color-cyan-400: #22d3ee;
+    --bp-color-gray-100-neon: #f1f5f9;
+    
+    /* Vintage Vibes */
+    --bp-color-cream-100: #fefce8; /* Ajustado ligeramente de yellow-50 a un crema más neutro */
+    --bp-color-cream-200: #fef9c3; /* yellow-100 */
+    --bp-color-teal-700: #0d9488;
+    --bp-color-teal-900: #134e4a;
+    --bp-color-brown-700: #92400e; /* amber-700 */
+    --bp-color-brown-900: #78350f; /* amber-800 */
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    line-height: 1.5;
+    background-color: var(--bp-color-gray-100);
+    color: var(--bp-color-gray-800);
+}
+
+.editor-layout {
+    display: flex;
+    height: 100%;
+}
+
+.editor-aside {
+    width: 35%;
+    min-width: 360px;
+    max-width: 520px;
+    padding: 1.25rem;
+    background-color: var(--bp-color-gray-50);
+    overflow-y: auto;
+    border-right: 1px solid var(--bp-color-gray-200);
+    max-height: 100vh; 
+}
+
+.editor-header {
+    margin-bottom: 1.5rem;
+}
+
+.editor-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--bp-color-gray-900);
+    line-height: 1.2;
+}
+
+.editor-subtitle {
+    font-size: 0.875rem;
+    color: var(--bp-color-gray-600);
+    margin-top: 0.25rem;
+}
+.festival-name {
+    font-weight: 600;
+    color: var(--bp-color-indigo-600);
+}
+
+.editor-section {
+    margin-bottom: 1.5rem;
+}
+
+.editor-section .section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--bp-color-gray-700);
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--bp-color-gray-300);
+}
+
+.form-group {
+    margin-bottom: 0.75rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--bp-color-gray-700);
+}
+.form-label-xs {
+    display: block;
+    margin-bottom: 0.125rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--bp-color-gray-600);
+}
+.form-label-inline {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--bp-color-gray-700);
+}
+
+
+.input-field {
+    width: 100%;
+    padding: 0.625rem 0.875rem; 
+    font-size: 0.875rem; 
+    border: 1px solid var(--bp-color-gray-300);
+    border-radius: 0.375rem; 
+    background-color: var(--bp-color-white);
+    color: var(--bp-color-gray-900);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); 
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    box-sizing: border-box; /* Para que padding no afecte el width 100% */
+}
+.input-field:focus {
+    border-color: var(--bp-color-indigo-500);
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25); 
+}
+.input-sm { 
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+
+.form-checkbox {
+    height: 1rem; 
+    width: 1rem; 
+    border-radius: 0.25rem; 
+    border: 1px solid var(--bp-color-gray-300); /* Estilo base del borde */
+    color: var(--bp-color-indigo-600); 
+    margin-right: 0.5rem;
+    vertical-align: middle; /* Mejor alineación con texto */
+}
+.form-checkbox:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    --tw-ring-color: var(--bp-color-indigo-500); 
+    box-shadow: 0 0 0 2px var(--tw-ring-color); /* Usar var(--bp-color-indigo-500) directamente si no hay var de Tailwind */
+    border-color: var(--bp-color-indigo-500); /* Borde al hacer foco */
+}
+.form-checkbox-sm { height: 0.875rem; width: 0.875rem; }
+
+
+.palette-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem; 
+}
+
+.btn-palette {
+    padding: 0.375rem 0.75rem; 
+    font-size: 0.75rem; 
+    border: 1px solid var(--bp-color-gray-300);
+    background-color: var(--bp-color-white);
+    color: var(--bp-color-gray-700);
+    border-radius: 0.375rem; 
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.btn-palette:hover {
+    background-color: var(--bp-color-gray-100);
+    border-color: var(--bp-color-gray-400);
+}
+.btn-palette.active {
+    background-color: var(--bp-color-indigo-600);
+    color: var(--bp-color-white);
+    border-color: var(--bp-color-indigo-600);
+    font-weight: 600;
+}
+
+.section-config-item {
+    margin-bottom: 1rem; 
+    border: 1px solid var(--bp-color-gray-200);
+    border-radius: 0.375rem; 
+    background-color: var(--bp-color-white);
+}
+.section-config-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer; 
+    padding: 0.75rem; 
+    border-bottom: 1px solid var(--bp-color-gray-200);
+}
+.section-config-item.collapsed .section-config-header {
+    border-bottom-color: transparent; 
+}
+
+.section-header-controls {
+    display: flex;
+    align-items: center;
+}
+.section-toggle-icon {
+    margin-right: 0.5rem;
+    font-size: 0.75rem; 
+    color: var(--bp-color-gray-500);
+    transition: transform 0.2s ease-in-out;
+}
+.section-config-item.collapsed .section-toggle-icon {
+    transform: rotate(-90deg);
+}
+
+.section-config-body {
+    padding: 0.75rem; 
+    transition: max-height 0.3s ease-out, opacity 0.2s ease-out, padding 0.3s ease-out, visibility 0s linear 0.3s;
+    max-height: 1200px; 
+    overflow: hidden;
+    opacity: 1;
+    visibility: visible;
+}
+.section-config-item.collapsed .section-config-body {
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    visibility: hidden; 
+    transition: max-height 0.3s ease-out, opacity 0.2s ease-out, padding 0.3s ease-out, visibility 0s linear 0s;
+}
+.config-disabled-by-template {
+    opacity: 0.6;
+    pointer-events: none; 
+}
+.config-disabled-by-template .section-config-header {
+    cursor: not-allowed;
+}
+
+
+.editor-footer {
+    margin-top: 1.5rem; 
+    padding-top: 1.5rem; 
+    border-top: 1px solid var(--bp-color-gray-300);
+    text-align: center;
+}
+.btn-primary-editor {
+    width: 100%;
+    padding: 0.625rem 1rem; 
+    font-size: 0.875rem; 
+    font-weight: 600; 
+    background-color: var(--bp-color-indigo-600);
+    color: var(--bp-color-white);
+    border: none;
+    border-radius: 0.375rem; 
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+.btn-primary-editor:hover {
+    background-color: var(--bp-color-indigo-700);
+}
+.editor-note {
+    font-size: 0.75rem; 
+    color: var(--bp-color-gray-500);
+    margin-top: 0.5rem; 
+}
+
+/* Preview Area */
+.preview-area-wrapper {
+    width: 65%;
+    overflow-y: auto;
+    background-color: var(--bp-color-gray-200); 
+    padding: 1rem; 
+    max-height: 100vh; /* Para scroll */
+}
+
+.preview-area {
+    margin: 0 auto; 
+    max-width: 1000px; 
+    background-color: var(--bp-color-white); 
+    min-height: 100%; 
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); 
+    border-radius: 0.25rem; 
+    transition: background-color 0.3s ease, font-family 0.3s ease;
+}
+
+#preview-section-container {
+    padding: 1.5rem; 
+}
+
+.preview-section {
+    border: 1px solid var(--bp-color-gray-300);
+    margin-bottom: 1.5rem; 
+    padding: 1.5rem; 
+    min-height: 100px; 
+    transition: all 0.3s ease-in-out;
+    border-radius: 0.375rem; 
+    background-color: rgba(255, 255, 255, 0.5); 
+}
+
+.preview-section.section-type-informacion.image-align-left,
+.preview-section.section-type-informacion.image-align-right {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start; 
+}
+.preview-section.section-type-informacion.image-align-top,
+.preview-section.section-type-informacion.image-align-bottom {
+    display: flex; /* Puede ser block o flex column */
+    flex-direction: column;
+    align-items: center; 
+}
+
+.preview-section-informacion-image {
+    max-width: 100%; 
+    height: auto;
+    border-radius: 0.25rem;
+}
+
+.preview-section.section-type-informacion.image-align-left .preview-section-informacion-image,
+.preview-section.section-type-informacion.image-align-right .preview-section-informacion-image {
+    flex: 0 0 40%; 
+    max-width: 40%;
+}
+.preview-section.section-type-informacion.image-align-left .preview-section-informacion-image {
+    margin-right: 1.5rem; 
+}
+.preview-section.section-type-informacion.image-align-right .preview-section-informacion-image {
+    margin-left: 1.5rem; 
+    order: 1; 
+}
+.preview-section.section-type-informacion.image-align-left .preview-section-informacion-content,
+.preview-section.section-type-informacion.image-align-right .preview-section-informacion-content {
+    flex: 1 1 auto; 
+}
+
+.preview-section.section-type-informacion.image-align-top .preview-section-informacion-image {
+    margin-bottom: 1rem;
+    max-width: 60%; 
+}
+.preview-section.section-type-informacion.image-align-bottom .preview-section-informacion-image {
+    margin-top: 1rem;
+    max-width: 60%;
+}
+
+
+.preview-section h3 {
+    font-size: 1.5rem; 
+    font-weight: 700; 
+    margin-top: 0;
+    margin-bottom: 0.75rem; 
+    border-bottom: 1px solid var(--bp-color-gray-200); /* Color base */
+    padding-bottom: 0.5rem;
+}
+
+.preview-section p, .preview-section ul, .preview-section div:not(.preview-header-sim):not(.preview-footer-sim) { /* Evitar afectar divs de header/footer sim */
+    font-size: 0.9rem; 
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
+}
+.preview-section ul {
+    list-style-type: disc;
+    padding-left: 1.25rem; 
+}
+.preview-section button.btn-primary-preview { 
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    cursor: default; 
+    border: none; /* Para que se vea como botón de paleta */
+}
+
+
+/* --- Paletas de Colores Aplicadas --- */
+/* Paleta 1: Beatpass Default (Indigo & Gris) */
+.palette-beatpass-default .preview-area { background-color: var(--bp-color-white); }
+.palette-beatpass-default .preview-section { border-color: var(--bp-color-indigo-200); background-color: var(--bp-color-indigo-50); }
+.palette-beatpass-default .preview-section h3 { color: var(--bp-color-indigo-700); border-bottom-color: var(--bp-color-indigo-200); }
+.palette-beatpass-default .preview-section p, .palette-beatpass-default .preview-section ul { color: var(--bp-color-gray-700); }
+.palette-beatpass-default .preview-header-sim { background-color: var(--bp-color-indigo-600); color: var(--bp-color-white); }
+.palette-beatpass-default .preview-footer-sim { background-color: var(--bp-color-gray-800); color: var(--bp-color-gray-300); }
+.palette-beatpass-default .preview-section button.btn-primary-preview { background-color: var(--bp-color-indigo-600); color: var(--bp-color-white); }
+
+
+/* Paleta 2: Dark Red (Tonos Rojos y Grises Oscuros) */
+.palette-dark-red .preview-area { background-color: var(--bp-color-gray-900); }
+.palette-dark-red .preview-section { border-color: var(--bp-color-red-700); background-color: var(--bp-color-gray-800); }
+.palette-dark-red .preview-section h3 { color: var(--bp-color-red-300); border-bottom-color: var(--bp-color-red-700); }
+.palette-dark-red .preview-section p, .palette-dark-red .preview-section ul { color: var(--bp-color-gray-300); }
+.palette-dark-red .preview-header-sim { background-color: var(--bp-color-red-800); color: var(--bp-color-white); }
+.palette-dark-red .preview-footer-sim { background-color: var(--bp-color-black); color: var(--bp-color-gray-400); }
+.palette-dark-red .preview-section button.btn-primary-preview { background-color: var(--bp-color-red-700); color: var(--bp-color-white); }
+
+/* Paleta 3: Forest Green (Tonos Verdes y Claros) */
+.palette-forest-green .preview-area { background-color: var(--bp-color-green-50); }
+.palette-forest-green .preview-section { border-color: var(--bp-color-green-600); background-color: var(--bp-color-green-100); }
+.palette-forest-green .preview-section h3 { color: var(--bp-color-green-800); border-bottom-color: var(--bp-color-green-200); }
+.palette-forest-green .preview-section p, .palette-forest-green .preview-section ul { color: var(--bp-color-green-700); }
+.palette-forest-green .preview-header-sim { background-color: var(--bp-color-green-700); color: var(--bp-color-white); }
+.palette-forest-green .preview-footer-sim { background-color: var(--bp-color-green-900); color: var(--bp-color-green-100); }
+.palette-forest-green .preview-section button.btn-primary-preview { background-color: var(--bp-color-green-600); color: var(--bp-color-white); }
+
+/* Paleta 4: Ocean Blue (Tonos Azules y Claros) */
+.palette-ocean-blue .preview-area { background-color: var(--bp-color-blue-50); }
+.palette-ocean-blue .preview-section { border-color: var(--bp-color-blue-600); background-color: var(--bp-color-blue-100); }
+.palette-ocean-blue .preview-section h3 { color: var(--bp-color-blue-800); border-bottom-color: var(--bp-color-blue-200); }
+.palette-ocean-blue .preview-section p, .palette-ocean-blue .preview-section ul { color: var(--bp-color-blue-700); }
+.palette-ocean-blue .preview-header-sim { background-color: var(--bp-color-blue-700); color: var(--bp-color-white); }
+.palette-ocean-blue .preview-footer-sim { background-color: var(--bp-color-blue-900); color: var(--bp-color-blue-100); }
+.palette-ocean-blue .preview-section button.btn-primary-preview { background-color: var(--bp-color-blue-600); color: var(--bp-color-white); }
+
+/* Paleta 5: Sunset Orange */
+.palette-sunset-orange .preview-area { background-color: var(--bp-color-orange-50); }
+.palette-sunset-orange .preview-section { border-color: var(--bp-color-orange-300); background-color: var(--bp-color-orange-100); }
+.palette-sunset-orange .preview-section h3 { color: var(--bp-color-orange-700); border-bottom-color: var(--bp-color-orange-300); }
+.palette-sunset-orange .preview-section p, .palette-sunset-orange .preview-section ul { color: var(--bp-color-gray-700); } /* Texto oscuro sobre fondo claro */
+.palette-sunset-orange .preview-header-sim { background-color: var(--bp-color-orange-500); color: var(--bp-color-white); }
+.palette-sunset-orange .preview-footer-sim { background-color: var(--bp-color-gray-800); color: var(--bp-color-orange-100); }
+.palette-sunset-orange .preview-section button.btn-primary-preview { background-color: var(--bp-color-orange-500); color: var(--bp-color-white); }
+.palette-sunset-orange .map-iframe-placeholder { background-color: var(--bp-color-orange-100); border: 1px dashed var(--bp-color-orange-300); color: var(--bp-color-orange-700);}
+
+/* Paleta 6: Neon Nights */
+.palette-neon-nights .preview-area { background-color: var(--bp-color-night-blue-900); }
+.palette-neon-nights .preview-section { border-color: var(--bp-color-fuchsia-500); background-color: var(--bp-color-night-blue-800); }
+.palette-neon-nights .preview-section h3 { color: var(--bp-color-cyan-400); border-bottom-color: var(--bp-color-fuchsia-500); }
+.palette-neon-nights .preview-section p, .palette-neon-nights .preview-section ul { color: var(--bp-color-gray-100-neon); }
+.palette-neon-nights .preview-header-sim { background-color: var(--bp-color-black); color: var(--bp-color-cyan-400); }
+.palette-neon-nights .preview-footer-sim { background-color: var(--bp-color-black); color: var(--bp-color-fuchsia-500); }
+.palette-neon-nights .preview-section button.btn-primary-preview { background-color: var(--bp-color-fuchsia-500); color: var(--bp-color-white); }
+.palette-neon-nights .map-iframe-placeholder { background-color: var(--bp-color-night-blue-800); border: 1px dashed var(--bp-color-fuchsia-500); color: var(--bp-color-gray-400);}
+
+/* Paleta 7: Vintage Vibes */
+.palette-vintage-vibes .preview-area { background-color: var(--bp-color-cream-100); }
+.palette-vintage-vibes .preview-section { border-color: var(--bp-color-teal-700); background-color: var(--bp-color-cream-200); }
+.palette-vintage-vibes .preview-section h3 { color: var(--bp-color-brown-900); border-bottom-color: var(--bp-color-teal-700); }
+.palette-vintage-vibes .preview-section p, .palette-vintage-vibes .preview-section ul { color: var(--bp-color-brown-700); }
+.palette-vintage-vibes .preview-header-sim { background-color: var(--bp-color-teal-900); color: var(--bp-color-cream-100); }
+.palette-vintage-vibes .preview-footer-sim { background-color: var(--bp-color-brown-900); color: var(--bp-color-cream-200); }
+.palette-vintage-vibes .preview-section button.btn-primary-preview { background-color: var(--bp-color-teal-700); color: var(--bp-color-white); }
+.palette-vintage-vibes .map-iframe-placeholder { background-color: var(--bp-color-cream-200); border: 1px dashed var(--bp-color-teal-700); color: var(--bp-color-brown-700); }
+
+
+/* Estilos específicos para las secciones simuladas */
+.preview-header-sim {
+    text-align: center;
+    padding: 2rem 1rem; 
+    border-radius: 0.375rem 0.375rem 0 0; 
+    margin-bottom: 1.5rem; 
+    transition: background-image 0.3s ease, background-color 0.3s ease, color 0.3s ease; /* Para imagen de fondo */
+}
+.preview-header-sim img {
+    /* height: 60px;  Ahora se controla en el JS */
+    display: inline-block; /* Cambiado a inline-block para que text-align funcione si es necesario */
+    margin-bottom: 0.75rem; 
+}
+.preview-header-sim h1 {
+    font-size: 2.25rem; 
+    font-weight: 800; 
+    margin-bottom: 0.25rem; 
+}
+.preview-header-sim p {
+    font-size: 1.125rem; 
+}
+
+.preview-footer-sim {
+    text-align: center;
+    padding: 1.5rem 1rem; 
+    margin-top: 1.5rem; 
+    border-radius: 0 0 0.375rem 0.375rem; 
+}
+.preview-footer-sim p {
+    font-size: 0.875rem; 
+    margin-bottom: 0; /* Quitar margen si es el único elemento */
+}
+.preview-social-icons-simulated img {
+    height: 24px;
+    width: 24px;
+    margin: 0 0.5rem;
+    display: inline-block;
+    filter: grayscale(50%) opacity(0.7); 
+}
+.palette-dark-red .preview-social-icons-simulated img,
+.palette-neon-nights .preview-social-icons-simulated img {
+    filter: brightness(1.8) contrast(1.2) grayscale(10%); /* Ajuste para que se vean mejor en fondos oscuros */
+}
+
+
+.map-iframe-placeholder {
+    width: 100%;
+    height: 300px;
+    background-color: var(--bp-color-gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-radius: 0.25rem;
+    color: var(--bp-color-gray-500);
+    font-style: italic;
+    padding: 1rem;
+    box-sizing: border-box;
+}

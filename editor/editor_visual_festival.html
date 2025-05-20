@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>Editor Visual de Festival (Prototipo Frontend)</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="editor_visual_festival.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Lora:wght@400;500;700&family=Montserrat:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="editor-layout">
+        <aside class="editor-aside">
+            <div class="editor-header">
+                <h1 class="editor-title">Editor Visual</h1>
+                <p class="editor-subtitle">Festival: <span id="festival-name-placeholder" class="festival-name">Nombre del Festival</span></p>
+            </div>
+
+            <section class="editor-section">
+                <h2 class="section-title">Apariencia General</h2>
+                <div class="form-group">
+                    <label for="layout-structure" class="form-label">Plantilla de Estructura:</label>
+                    <select id="layout-structure" class="input-field">
+                        <option value="default">Predeterminada (Encabezado, Info, Artistas, Entradas, Mapa, Footer)</option>
+                        <option value="artist-focused">Enfocada en Artistas</option>
+                        <option value="tickets-first">Directo a Entradas</option>
+                        <option value="minimalist">Minimalista (Info, Entradas)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <h3 class="form-label">Paleta de Colores:</h3>
+                    <div class="palette-grid">
+                        <button data-palette="palette-beatpass-default" class="btn-palette active">Beatpass Default</button>
+                        <button data-palette="palette-dark-red" class="btn-palette">Rojo Oscuro</button>
+                        <button data-palette="palette-forest-green" class="btn-palette">Verde Bosque</button>
+                        <button data-palette="palette-ocean-blue" class="btn-palette">Azul Océano</button>
+                        <button data-palette="palette-sunset-orange" class="btn-palette">Atardecer Naranja</button>
+                        <button data-palette="palette-neon-nights" class="btn-palette">Noches Neón</button>
+                        <button data-palette="palette-vintage-vibes" class="btn-palette">Vintage</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="font-family-selector" class="form-label">Tipografía Principal:</label>
+                    <select id="font-family-selector" class="input-field">
+                        <option value="'Inter', sans-serif">Inter (Predeterminada)</option>
+                        <option value="'Roboto', sans-serif">Roboto</option>
+                        <option value="'Lora', serif">Lora</option>
+                        <option value="'Montserrat', sans-serif">Montserrat</option>
+                    </select>
+                </div>
+            </section>
+
+            <section class="editor-section">
+                <h2 class="section-title">Contenido de Secciones</h2>
+
+                <div class="section-config-item">
+                    <div class="section-config-header">
+                        <label class="form-label-inline">Sección: Encabezado</label>
+                        <div class="section-header-controls">
+                            <span class="section-toggle-icon">▼</span>
+                            <input type="checkbox" id="toggle-header" class="form-checkbox section-toggle" data-section-id="header" checked>
+                        </div>
+                    </div>
+                    <div class="section-config-body config-header">
+                        <div class="form-group">
+                            <label for="content-header-title" class="form-label-xs">Título del Festival:</label>
+                            <input type="text" id="content-header-title" class="input-field input-sm" placeholder="Nombre del Festival">
+                        </div>
+                        <div class="form-group">
+                            <label for="content-header-subtitle" class="form-label-xs">Subtítulo/Fechas:</label>
+                            <input type="text" id="content-header-subtitle" class="input-field input-sm" placeholder="Ej: 10-12 Julio | Ciudad">
+                        </div>
+                        <div class="form-group">
+                            <label for="content-header-bg-image" class="form-label-xs">URL Imagen de Fondo (Encabezado):</label>
+                            <input type="url" id="content-header-bg-image" class="input-field input-sm" placeholder="https://ejemplo.com/imagen.jpg">
+                        </div>
+                        <div class="form-group">
+                            <label for="content-header-alignment" class="form-label-xs">Alineación del Texto:</label>
+                            <select id="content-header-alignment" class="input-field input-sm">
+                                <option value="center">Centro</option>
+                                <option value="left">Izquierda</option>
+                                <option value="right">Derecha</option>
+                            </select>
+                        </div>
+                        <label class="form-label-inline text-xs">
+                            <input type="checkbox" id="config-header-show-logo" class="form-checkbox-sm" checked>
+                            Mostrar Logo (simulado)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="section-config-item">
+                    <div class="section-config-header">
+                        <label class="form-label-inline">Sección: Información</label>
+                         <div class="section-header-controls">
+                            <span class="section-toggle-icon">▼</span>
+                            <input type="checkbox" id="toggle-informacion" class="form-checkbox section-toggle" data-section-id="informacion" checked>
+                        </div>
+                    </div>
+                    <div class="section-config-body config-informacion">
+                        <div class="form-group">
+                            <label for="content-informacion-title" class="form-label-xs">Título de la Sección:</label>
+                            <input type="text" id="content-informacion-title" class="input-field input-sm" value="Acerca del Festival">
+                        </div>
+                        <div class="form-group">
+                            <label for="content-informacion-text" class="form-label-xs">Texto Principal:</label>
+                            <textarea id="content-informacion-text" rows="3" class="input-field input-sm" placeholder="Descripción detallada del festival..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="content-informacion-image-url" class="form-label-xs">URL Imagen Descriptiva:</label>
+                            <input type="url" id="content-informacion-image-url" class="input-field input-sm" placeholder="https://ejemplo.com/imagen.jpg">
+                        </div>
+                        <div class="form-group">
+                            <label for="content-informacion-image-align" class="form-label-xs">Alineación Imagen:</label>
+                            <select id="content-informacion-image-align" class="input-field input-sm">
+                                <option value="none">No mostrar</option>
+                                <option value="left">Izquierda del texto</option>
+                                <option value="right">Derecha del texto</option>
+                                <option value="top">Encima del texto</option>
+                                <option value="bottom">Debajo del texto</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section-config-item">
+                    <div class="section-config-header">
+                        <label class="form-label-inline">Sección: Artistas</label>
+                         <div class="section-header-controls">
+                            <span class="section-toggle-icon">▼</span>
+                            <input type="checkbox" id="toggle-artistas" class="form-checkbox section-toggle" data-section-id="artistas" checked>
+                        </div>
+                    </div>
+                    <div class="section-config-body config-artistas">
+                        <div class="form-group">
+                            <label for="content-artistas-title" class="form-label-xs">Título de la Sección:</label>
+                            <input type="text" id="content-artistas-title" class="input-field input-sm" value="Cartel Principal">
+                        </div>
+                        <div class="form-group">
+                            <label for="count-artistas" class="form-label-xs">Número de artistas (simulado):</label>
+                            <input type="number" id="count-artistas" class="input-field input-sm" value="3" min="1">
+                        </div>
+                         <div class="form-group">
+                            <label for="content-artistas-display" class="form-label-xs">Visualización Artistas:</label>
+                            <select id="content-artistas-display" class="input-field input-sm">
+                                <option value="list">Lista</option>
+                                <option value="cards">Tarjetas (simulado)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-config-item">
+                    <div class="section-config-header">
+                        <label class="form-label-inline">Sección: Entradas</label>
+                        <div class="section-header-controls">
+                            <span class="section-toggle-icon">▼</span>
+                            <input type="checkbox" id="toggle-entradas" class="form-checkbox section-toggle" data-section-id="entradas" checked>
+                        </div>
+                    </div>
+                     <div class="section-config-body config-entradas">
+                        <div class="form-group">
+                            <label for="content-entradas-title" class="form-label-xs">Título de la Sección:</label>
+                            <input type="text" id="content-entradas-title" class="input-field input-sm" value="¡Consigue tus Entradas!">
+                        </div>
+                        <div class="form-group">
+                            <label for="text-entradas-button" class="form-label-xs">Texto del Botón de Compra:</label>
+                            <input type="text" id="text-entradas-button" class="input-field input-sm" value="Comprar Ahora">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-config-item">
+                    <div class="section-config-header">
+                        <label class="form-label-inline">Sección: Mapa</label>
+                        <div class="section-header-controls">
+                            <span class="section-toggle-icon">▼</span>
+                            <input type="checkbox" id="toggle-mapa" class="form-checkbox section-toggle" data-section-id="mapa" checked>
+                        </div>
+                    </div>
+                     <div class="section-config-body config-mapa">
+                        <div class="form-group">
+                            <label for="content-mapa-title" class="form-label-xs">Título de la Sección:</label>
+                            <input type="text" id="content-mapa-title" class="input-field input-sm" value="¿Cómo Llegar?">
+                        </div>
+                        <div class="form-group">
+                            <label for="content-mapa-url" class="form-label-xs">URL Google Maps (Embebido):</label>
+                            <input type="url" id="content-mapa-url" class="input-field input-sm" placeholder="Pega aquí el enlace de Google Maps para embeber">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section-config-item">
+                    <div class="section-config-header">
+                        <label class="form-label-inline">Sección: Pie de Página</label>
+                        <div class="section-header-controls">
+                            <span class="section-toggle-icon">▼</span>
+                            <input type="checkbox" id="toggle-footer" class="form-checkbox section-toggle" data-section-id="footer" checked>
+                        </div>
+                    </div>
+                     <div class="section-config-body config-footer">
+                        <div class="form-group">
+                            <label for="content-footer-text" class="form-label-xs">Texto del Pie de Página:</label>
+                            <input type="text" id="content-footer-text" class="input-field input-sm" value="© Nombre del Festival 2025. Todos los derechos reservados.">
+                        </div>
+                        <label class="form-label-inline text-xs">
+                            <input type="checkbox" id="config-footer-show-social" class="form-checkbox-sm">
+                            Mostrar iconos redes sociales (simulado)
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <div class="editor-footer">
+                <button id="apply-preview-button" class="btn-primary-editor">Actualizar Previsualización</button>
+                <p class="editor-note">Los cambios son solo para previsualización.</p>
+            </div>
+        </aside>
+
+        <div class="preview-area-wrapper">
+            <main id="preview-main-content" class="preview-area">
+                <div id="preview-section-container">
+                    </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="editor_visual_festival.js"></script>
+</body>
+</html>
