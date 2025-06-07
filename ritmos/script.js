@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Configuración ---
     const API_BASE_URL = 'https://daw2-tfg-beatpass.onrender.com/api';
+    //const API_BASE_URL = 'http://localhost:8080/BeatpassTFG/api'; // Para desarrollo local
     const FESTIVAL_ID = 20;
     const CLAVE_PUBLICABLE_STRIPE = 'pk_test_51RLUyq4Et9Src69RTyKKrqn48wubA5QIbS9zTguw8chLB8FGgwMt9sZV6VwvT4UEWE0vnKxaJCNFlj87EY6i9mGK00ggcR1AiX';
 
@@ -42,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalPaymentForm = document.getElementById('modal-payment-form');
     const modalBuyerNameInput = document.getElementById('modal-buyer-name');
     const modalBuyerEmailInput = document.getElementById('modal-buyer-email');
+    const modalBuyerEmailConfirmInput = document.getElementById('modal-buyer-email-confirm');
     const modalCardErrors = document.getElementById('modal-card-errors');
     const modalPayButton = document.getElementById('modal-pay-button');
     const modalFormArea = document.getElementById('modal-form-area');
@@ -66,9 +68,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================================================
     function debounce(func, wait = 15, immediate = false) {
         let timeout;
-        return function() {
+        return function () {
             const context = this, args = arguments;
-            const later = function() {
+            const later = function () {
                 timeout = null;
                 if (!immediate) func.apply(context, args);
             };
@@ -143,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================================================
     // == Funciones de Renderizado del DOM
     // =========================================================================
-     function displayFestivalDetails(festivalData) {
+    function displayFestivalDetails(festivalData) {
         if (!festivalData) {
             document.getElementById('festival-name-line1').textContent = 'Festival';
             document.getElementById('festival-subtitle').textContent = 'Detalles no disponibles';
@@ -276,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if(!purchaseModal || !modalTicketNameTitle || !modalSelectedTicketName || !modalSelectedTicketPrice || !modalTicketQuantityInput || !modalFormArea || !modalConfirmationArea || !modalPaymentForm) {
+        if (!purchaseModal || !modalTicketNameTitle || !modalSelectedTicketName || !modalSelectedTicketPrice || !modalTicketQuantityInput || !modalFormArea || !modalConfirmationArea || !modalPaymentForm) {
             console.error("Faltan elementos de la modal en el DOM.");
             displayError("Error al abrir el formulario de compra. Elementos no encontrados.", true);
             return;
@@ -313,7 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (cardMountElement) {
                 modalCardElement.mount(cardMountElement);
                 modalCardElement.on('change', event => {
-                    if(modalCardErrors) modalCardErrors.textContent = event.error ? event.error.message : '';
+                    if (modalCardErrors) modalCardErrors.textContent = event.error ? event.error.message : '';
                 });
             } else {
                 console.error("Contenedor #modal-card-element no encontrado para Stripe.");
@@ -325,7 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modalFormArea.style.display = 'block';
         modalConfirmationArea.style.display = 'none';
         modalPaymentForm.reset();
-        if(modalCardErrors) modalCardErrors.textContent = '';
+        if (modalCardErrors) modalCardErrors.textContent = '';
     }
 
     function updateModalTotalPrice() {
@@ -355,8 +357,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function handleModalPurchaseSubmit(event) {
         event.preventDefault();
-        if (!modalPayButton || !modalCardErrors || !stripe || !modalCardElement || !modalTicketQuantityInput || !modalBuyerNameInput || !modalBuyerEmailInput || !currentSelectedTicketType) {
-            console.error("Elementos de pago, formulario o tipo de entrada no inicializados. currentSelectedTicketType:", currentSelectedTicketType);
+        if (!modalPayButton || !modalCardErrors || !stripe || !modalCardElement || !modalTicketQuantityInput || !modalBuyerNameInput || !modalBuyerEmailInput || !modalBuyerEmailConfirmInput || !currentSelectedTicketType) {
+            console.error("Elementos de pago, formulario o tipo de entrada no inicializados.");
             displayError("Error en el sistema de pago. Inténtalo de nuevo.", true);
             return;
         }
@@ -365,9 +367,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!currentSelectedTicketType || typeof currentSelectedTicketType.idEntrada === 'undefined') {
             console.error('[handleModalPurchaseSubmit] ERROR FATAL: currentSelectedTicketType o su idEntrada no está definido antes de la compra.');
             modalCardErrors.textContent = 'Error interno: No se ha seleccionado un tipo de entrada válido para la compra.';
-            if(modalPayButton.disabled) {
-                 modalPayButton.disabled = false;
-                 updateModalTotalPrice();
+            if (modalPayButton.disabled) {
+                modalPayButton.disabled = false;
+                updateModalTotalPrice();
             }
             return;
         }
@@ -376,9 +378,27 @@ document.addEventListener('DOMContentLoaded', () => {
         modalPayButton.textContent = 'Procesando...';
         modalCardErrors.textContent = '';
 
+        // Limpiar errores visuales previos
+        modalBuyerEmailInput.classList.remove('input-error');
+        modalBuyerEmailConfirmInput.classList.remove('input-error');
+
         const cantidad = parseInt(modalTicketQuantityInput.value);
         const nombreComprador = modalBuyerNameInput.value.trim();
         const emailComprador = modalBuyerEmailInput.value.trim();
+        const emailCompradorConfirm = modalBuyerEmailConfirmInput.value.trim();
+
+        if (emailComprador !== emailCompradorConfirm) {
+            modalCardErrors.textContent = 'Los correos electrónicos no coinciden. Por favor, verifica.';
+
+            // Añadir feedback visual
+            modalBuyerEmailInput.classList.add('input-error');
+            modalBuyerEmailConfirmInput.classList.add('input-error');
+
+            modalPayButton.disabled = false;
+            updateModalTotalPrice(); // Restaura el texto del botón
+            return;
+        }
+
 
         if (!nombreComprador || !emailComprador || !/^\S+@\S+\.\S+$/.test(emailComprador) || cantidad <= 0) {
             modalCardErrors.textContent = 'Por favor, completa tu Nombre, Email válido y asegura que la Cantidad sea mayor a 0.';
@@ -444,7 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (currentIdCompraTemporal) {
                     formDataConfirmar.append('idCompraTemporal', currentIdCompraTemporal);
                 } else {
-                    console.warn("[handleModalPurchaseSubmit] idCompraTemporal es '"+currentIdCompraTemporal+"' y no se está incluyendo en el payload de confirmar-compra para /public/venta/confirmar-compra."); // Línea ~473
+                    console.warn("[handleModalPurchaseSubmit] idCompraTemporal es '" + currentIdCompraTemporal + "' y no se está incluyendo en el payload de confirmar-compra para /public/venta/confirmar-compra."); // Línea ~473
                 }
 
                 console.log("[handleModalPurchaseSubmit] Payload (URLSearchParams) para confirmar-compra (CORREGIDO):", formDataConfirmar.toString()); // Línea ~476
@@ -469,11 +489,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (jsonError && (jsonError.error || jsonError.mensaje)) {
                             backendErrorMsg = jsonError.error || jsonError.mensaje; // Usar el mensaje de error del backend
                         } else {
-                           backendErrorMsg += ` - ${errorText.substring(0,200)}...`; // Fallback
+                            backendErrorMsg += ` - ${errorText.substring(0, 200)}...`; // Fallback
                         }
-                    } catch(e) {
-                         // Si no es JSON, usar el texto directamente
-                         backendErrorMsg += ` - ${errorText.substring(0,200)}...`;
+                    } catch (e) {
+                        // Si no es JSON, usar el texto directamente
+                        backendErrorMsg += ` - ${errorText.substring(0, 200)}...`;
                     }
                     throw new Error(backendErrorMsg); // Línea ~467 (antes)
                 }
@@ -524,14 +544,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p><strong>Comprador:</strong> ${primeraEntrada.nombreComprador || 'N/A'}</p>
                 <p><strong>Email:</strong> ${primeraEntrada.emailComprador || 'N/A'}</p>
                 <p><strong>Código:</strong> ${primeraEntrada.codigoQr || 'N/A'}</p> 
-                ${entradasCompradas.length > 1 ? `<p><em>(y ${entradasCompradas.length -1} entrada(s) más)</em></p>` : ''}`;
+                ${entradasCompradas.length > 1 ? `<p><em>(y ${entradasCompradas.length - 1} entrada(s) más)</em></p>` : ''}`;
 
             // Mostrar la imagen QR si la URL de datos está disponible
             if (primeraEntrada.qrCodeImageDataUrl) {
-                 modalPurchasedTicketQr.src = primeraEntrada.qrCodeImageDataUrl;
-                 modalPurchasedTicketQr.style.display = 'block';
+                modalPurchasedTicketQr.src = primeraEntrada.qrCodeImageDataUrl;
+                modalPurchasedTicketQr.style.display = 'block';
             } else if (primeraEntrada.codigoQr) { // Si no hay URL de imagen pero sí código, intentar generarla
-                 generateAndDisplayModalQR(primeraEntrada.codigoQr);
+                generateAndDisplayModalQR(primeraEntrada.codigoQr);
             } else {
                 modalPurchasedTicketQr.style.display = 'none';
             }
@@ -539,7 +559,7 @@ document.addEventListener('DOMContentLoaded', () => {
             modalPurchasedTicketDetails.innerHTML = "<p>No se pudieron obtener los detalles de la compra. Por favor, revisa tu email para la confirmación.</p>";
             modalPurchasedTicketQr.style.display = 'none';
         }
-        if(modalCardElement) modalCardElement.clear();
+        if (modalCardElement) modalCardElement.clear();
         modalPaymentForm.reset();
         updateModalTotalPrice();
     }
@@ -592,7 +612,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 loader.classList.add('hidden');
                 loader.addEventListener('transitionend', () => loader?.remove(), { once: true });
             }
-            if(!document.querySelector('.aos-animate')) {
+            if (!document.querySelector('.aos-animate')) {
                 initAOS();
             }
         }
@@ -717,7 +737,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
+        anchor.addEventListener('click', function (e) {
             const targetId = this.getAttribute('href');
             if (targetId === '#' || !targetId.startsWith('#')) return;
 
@@ -791,8 +811,8 @@ document.addEventListener('DOMContentLoaded', () => {
             ticketGridElement.innerHTML = '';
             ticketGridElement.appendChild(p);
         } else if (loadingTicketsP) {
-             loadingTicketsP.textContent = 'Cargando tipos de entrada...';
-             if (ticketGridElement) {ticketGridElement.innerHTML = ''; ticketGridElement.appendChild(loadingTicketsP);}
+            loadingTicketsP.textContent = 'Cargando tipos de entrada...';
+            if (ticketGridElement) { ticketGridElement.innerHTML = ''; ticketGridElement.appendChild(loadingTicketsP); }
         }
 
         const [festivalData, ticketDataResultIgnored] = await Promise.all([

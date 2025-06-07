@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalPaymentForm = document.getElementById('modal-payment-form'); // El form puede tener ID genérico
     const modalBuyerNameInput = document.getElementById('modal-buyer-name');
     const modalBuyerEmailInput = document.getElementById('modal-buyer-email');
+    const modalBuyerEmailConfirmInput = document.getElementById('modal-buyer-email-confirm');
     const modalCardElementContainer = document.getElementById('modal-card-element'); // Contenedor para el input de Stripe
     const modalCardErrors = document.getElementById('modal-card-errors'); // Para errores de Stripe
     const modalPayButton = document.getElementById('modal-pay-button'); // El botón de pagar
@@ -66,9 +67,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================================================
     function debounce(func, wait = 15, immediate = false) {
         let timeout;
-        return function() {
+        return function () {
             const context = this, args = arguments;
-            const later = function() { timeout = null; if (!immediate) func.apply(context, args); };
+            const later = function () { timeout = null; if (!immediate) func.apply(context, args); };
             const callNow = immediate && !timeout;
             clearTimeout(timeout);
             timeout = setTimeout(later, wait);
@@ -144,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (startDate !== endDate && endDate !== '?') dateText += ` AL ${endDate}`;
             datesLocationElement.textContent = `${dateText} | ${location.toUpperCase()}`;
         }
-         // Actualizar también la sección de ubicación estática si los datos están disponibles
+        // Actualizar también la sección de ubicación estática si los datos están disponibles
         const locationCityEl = document.getElementById('location-city-lnf');
         const locationDescEl = document.getElementById('location-description-lnf');
         if (locationCityEl && festivalData.ubicacion) locationCityEl.innerHTML = `${festivalData.ubicacion.toUpperCase()}:<br>TIERRA DE LEYENDAS`;
@@ -306,35 +307,60 @@ document.addEventListener('DOMContentLoaded', () => {
             modalPayButton.innerHTML = '<span>Forjar Pase</span>';
             modalPayButton.disabled = true;
             if (modalCardErrors) {
-                 if (cantidad <= 0 && currentSelectedTicketType.precio > 0) modalCardErrors.textContent = 'La cantidad debe ser al menos 1.';
-                 else if (cantidad > stockDisponible && stockDisponible > 0) modalCardErrors.textContent = `Cantidad máxima disponible: ${stockDisponible}.`;
-                 else if (stockDisponible <= 0 && currentSelectedTicketType.precio > 0) modalCardErrors.textContent = 'Pases agotados para este tipo.';
+                if (cantidad <= 0 && currentSelectedTicketType.precio > 0) modalCardErrors.textContent = 'La cantidad debe ser al menos 1.';
+                else if (cantidad > stockDisponible && stockDisponible > 0) modalCardErrors.textContent = `Cantidad máxima disponible: ${stockDisponible}.`;
+                else if (stockDisponible <= 0 && currentSelectedTicketType.precio > 0) modalCardErrors.textContent = 'Pases agotados para este tipo.';
             }
         }
     }
 
     async function handleLNFModalPurchaseSubmit(event) {
         event.preventDefault();
-        if (!modalPayButton || !modalCardErrors || !stripe || !modalCardElement || !modalTicketQuantityInput || !modalBuyerNameInput || !modalBuyerEmailInput || !currentSelectedTicketType) {
+        if (!modalPayButton || !modalCardErrors || !stripe || !modalCardElement || !modalTicketQuantityInput || !modalBuyerNameInput || !modalBuyerEmailInput || !modalBuyerEmailConfirmInput || !currentSelectedTicketType) {
             displayLNFError("Error en el sistema de forja. Inténtalo de nuevo.", true);
             return;
         }
-         if (!currentSelectedTicketType || typeof currentSelectedTicketType.idEntrada === 'undefined') {
+        if (!currentSelectedTicketType || typeof currentSelectedTicketType.idEntrada === 'undefined') {
             if (modalCardErrors) modalCardErrors.textContent = 'Error interno: No se ha seleccionado un tipo de pase válido.';
-            if(modalPayButton) { modalPayButton.disabled = false; updateLNFModalTotalPrice(); }
+            if (modalPayButton) { modalPayButton.disabled = false; updateLNFModalTotalPrice(); }
             return;
         }
 
         modalPayButton.disabled = true;
         modalPayButton.innerHTML = '<span>Forjando...</span>';
-        if(modalCardErrors) modalCardErrors.textContent = '';
+        if (modalCardErrors) modalCardErrors.textContent = '';
+
+        // Limpiar errores visuales previos
+        modalBuyerEmailInput.classList.remove('input-error');
+        modalBuyerEmailConfirmInput.classList.remove('input-error');
+
 
         const cantidad = parseInt(modalTicketQuantityInput.value);
         const nombreComprador = modalBuyerNameInput.value.trim();
         const emailComprador = modalBuyerEmailInput.value.trim();
+        const emailCompradorConfirm = modalBuyerEmailConfirmInput.value.trim();
+
+        if (emailComprador !== emailCompradorConfirm) {
+            if (modalCardErrors) modalCardErrors.textContent = 'Los correos electrónicos no coinciden. Por favor, verifica.';
+
+            // Añadir feedback visual a los campos
+            modalBuyerEmailInput.classList.add('input-error');
+            modalBuyerEmailConfirmInput.classList.add('input-error');
+
+            modalPayButton.disabled = false;
+            // Restaurar texto del botón sin llamar a la función que borra el error
+            const stock = currentSelectedTicketType.stock;
+            if (cantidad > 0 && cantidad <= stock) {
+                const total = currentSelectedTicketType.precio * cantidad;
+                modalPayButton.innerHTML = `<span>Forjar por ${total.toFixed(2)} €</span>`;
+            } else {
+                modalPayButton.innerHTML = '<span>Forjar Pase</span>';
+            }
+            return;
+        }
 
         if (!nombreComprador || !emailComprador || !/^\S+@\S+\.\S+$/.test(emailComprador) || cantidad <= 0) {
-            if(modalCardErrors) modalCardErrors.textContent = 'Completa tu Nombre de Guerrero, Email y Cantidad (mín. 1).';
+            if (modalCardErrors) modalCardErrors.textContent = 'Completa tu Nombre de Guerrero, Email y Cantidad (mín. 1).';
             modalPayButton.disabled = false; updateLNFModalTotalPrice(); return;
         }
 
@@ -370,7 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const errorText = await confirmResponse.text();
                     let backendErrorMsg = `Error al confirmar forja en servidor (${confirmResponse.status})`;
                     try { const jsonError = JSON.parse(errorText); backendErrorMsg = jsonError.error || jsonError.mensaje || backendErrorMsg; }
-                    catch(e) { backendErrorMsg += ` - ${errorText.substring(0,100)}...`;}
+                    catch (e) { backendErrorMsg += ` - ${errorText.substring(0, 100)}...`; }
                     throw new Error(backendErrorMsg);
                 }
                 const compraConfirmadaDTO = await confirmResponse.json();
@@ -409,13 +435,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p><strong>Guerrero:</strong> ${primeraEntrada.nombreComprador || 'N/A'}</p>
                 <p><strong>Email:</strong> ${primeraEntrada.emailComprador || 'N/A'}</p>
                 <p><strong>Sello Rúnico (QR):</strong> ${primeraEntrada.codigoQr || 'N/A'}</p>
-                ${entradasCompradas.length > 1 ? `<p><em>(y ${entradasCompradas.length -1} pase(s) más en tu arsenal)</em></p>` : ''}`;
+                ${entradasCompradas.length > 1 ? `<p><em>(y ${entradasCompradas.length - 1} pase(s) más en tu arsenal)</em></p>` : ''}`;
 
             if (primeraEntrada.qrCodeImageDataUrl) {
-                 modalPurchasedTicketQr.src = primeraEntrada.qrCodeImageDataUrl;
-                 modalPurchasedTicketQr.style.display = 'block';
+                modalPurchasedTicketQr.src = primeraEntrada.qrCodeImageDataUrl;
+                modalPurchasedTicketQr.style.display = 'block';
             } else if (primeraEntrada.codigoQr) {
-                 generateAndDisplayLNFModalQR(primeraEntrada.codigoQr);
+                generateAndDisplayLNFModalQR(primeraEntrada.codigoQr);
             } else {
                 modalPurchasedTicketQr.style.display = 'none';
             }
@@ -463,7 +489,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 loader.classList.add('hidden');
                 loader.addEventListener('transitionend', () => loader?.remove(), { once: true });
             }
-            if(!document.querySelector('.aos-animate')) { initAOS_LNF(); }
+            if (!document.querySelector('.aos-animate')) { initAOS_LNF(); }
         }
     }
 
@@ -490,7 +516,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('mouseenter', () => { if (cursorDot) cursorDot.style.opacity = 1; if (cursorRing) cursorRing.style.opacity = 1; isCursorVisible = true; });
         updateCursor();
     } else if (cursorDot || cursorRing) {
-        if(cursorDot) cursorDot.style.display = 'none'; if(cursorRing) cursorRing.style.display = 'none'; body.style.cursor = 'default';
+        if (cursorDot) cursorDot.style.display = 'none'; if (cursorRing) cursorRing.style.display = 'none'; body.style.cursor = 'default';
     }
 
 
@@ -541,7 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Smooth scroll - Adaptar si los IDs de header son diferentes
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
+        anchor.addEventListener('click', function (e) {
             const targetId = this.getAttribute('href');
             if (targetId === '#' || !targetId.startsWith('#')) return;
             const targetElement = document.querySelector(targetId);
@@ -587,7 +613,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tiposDeEntradaGlobalLNF = await fetchLNFData(`/festivales/${FESTIVAL_ID}/entradas`);
         } else {
             tiposDeEntradaGlobalLNF = []; // Vaciar si no está publicado
-            if(ticketGridElement) ticketGridElement.innerHTML = '<p class="text-center col-span-full" style="grid-column: 1 / -1;">Los pases para esta edición aún no han sido liberados.</p>';
+            if (ticketGridElement) ticketGridElement.innerHTML = '<p class="text-center col-span-full" style="grid-column: 1 / -1;">Los pases para esta edición aún no han sido liberados.</p>';
             console.warn(`LNF: El festival ID ${FESTIVAL_ID} no está PUBLICADO (estado: ${festivalData ? festivalData.estado : 'desconocido'}). No se cargarán tipos de entrada.`);
         }
         displayLNFTicketTypes(); // Muestra los tipos de entrada (o mensaje si está vacío)
