@@ -458,8 +458,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 formDataConfirmar.append('idFestival', FESTIVAL_ID.toString());
                 formDataConfirmar.append('idEntrada', currentSelectedTicketType.idEntrada.toString());
                 formDataConfirmar.append('cantidad', cantidad.toString());
-                formDataConfirmar.append('emailAsistente', emailComprador);
-                formDataConfirmar.append('nombreAsistente', nombreComprador);
+                formDataConfirmar.append('emailComprador', emailComprador);
+                formDataConfirmar.append('nombreComprador', nombreComprador);
 
                 if (currentIdCompraTemporal) {
                     formDataConfirmar.append('idCompraTemporal', currentIdCompraTemporal);
@@ -507,8 +507,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const entradasParaDisplay = compraConfirmadaDTO.entradasGeneradas.map(entradaGenerada => {
                         return {
                             nombreTipoEntrada: entradaGenerada.tipoEntradaOriginal || currentSelectedTicketType.tipo, // Usar 'tipoEntradaOriginal' del DTO
-                            nombreComprador: compraConfirmadaDTO.nombreAsistente,
-                            emailComprador: compraConfirmadaDTO.emailAsistente,
+                            nombreComprador: compraConfirmadaDTO.nombreComprador,
+                            emailComprador: compraConfirmadaDTO.emailComprador,
                             codigoQr: entradaGenerada.codigoQr, // Usar 'codigoQr'
                             qrCodeImageDataUrl: entradaGenerada.qrCodeImageDataUrl // Usar la imagen QR generada por el backend
                         };

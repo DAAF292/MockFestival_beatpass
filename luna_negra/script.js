@@ -385,8 +385,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 formDataConfirmar.append('idFestival', FESTIVAL_ID.toString());
                 formDataConfirmar.append('idEntrada', currentSelectedTicketType.idEntrada.toString());
                 formDataConfirmar.append('cantidad', cantidad.toString());
-                formDataConfirmar.append('emailAsistente', emailComprador);
-                formDataConfirmar.append('nombreAsistente', nombreComprador);
+                formDataConfirmar.append('emailComprador', emailComprador);
+                formDataConfirmar.append('nombreComprador', nombreComprador);
                 // idCompraTemporal no se usa aquí
 
                 const confirmResponse = await fetch(`${API_BASE_URL}/public/venta/confirmar-compra`, {
@@ -403,8 +403,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (compraConfirmadaDTO && Array.isArray(compraConfirmadaDTO.entradasGeneradas)) {
                     const entradasParaDisplay = compraConfirmadaDTO.entradasGeneradas.map(eg => ({
                         nombreTipoEntrada: eg.tipoEntradaOriginal || currentSelectedTicketType.tipo,
-                        nombreComprador: compraConfirmadaDTO.nombreAsistente,
-                        emailComprador: compraConfirmadaDTO.emailAsistente,
+                        nombreComprador: compraConfirmadaDTO.nombreComprador,
+                        emailComprador: compraConfirmadaDTO.emailComprador,
                         codigoQr: eg.codigoQr,
                         qrCodeImageDataUrl: eg.qrCodeImageDataUrl
                     }));
