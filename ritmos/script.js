@@ -13,8 +13,8 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- Configuración ---
-    const API_BASE_URL = 'https://daw2-tfg-beatpass.onrender.com/api';
-    //const API_BASE_URL = 'http://localhost:8080/BeatpassTFG/api'; // Para desarrollo local
+    //const API_BASE_URL = 'https://daw2-tfg-beatpass.onrender.com/api';
+    const API_BASE_URL = 'http://localhost:8080/BeatpassTFG/api'; // Para desarrollo local
     const FESTIVAL_ID = 20;
     const CLAVE_PUBLICABLE_STRIPE = 'pk_test_51RLUyq4Et9Src69RTyKKrqn48wubA5QIbS9zTguw8chLB8FGgwMt9sZV6VwvT4UEWE0vnKxaJCNFlj87EY6i9mGK00ggcR1AiX';
 
@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function fetchTicketTypes(festivalId) {
-        const url = `${API_BASE_URL}/festivales/${festivalId}/entradas`;
+        const url = `${API_BASE_URL}/festivales/${festivalId}/tipos-entrada`;
         try {
             console.log(`Workspaceing ticket types from: ${url}`);
             const response = await fetch(url);
@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log(`Processing ticket [${index}]:`, JSON.stringify(ticket, null, 2));
 
             if (!ticket ||
-                typeof ticket.idEntrada !== 'number' ||
+                typeof ticket.idTipoEntrada !== 'number' ||
                 typeof ticket.tipo !== 'string' ||
                 typeof ticket.precio !== 'number' ||
                 typeof ticket.descripcion !== 'string' ||
@@ -244,10 +244,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (ticket.stock > 0) {
                 const buyButton = document.createElement('button');
                 buyButton.classList.add('cta-button', 'ticket-buy-action-button');
-                buyButton.dataset.ticketId = ticket.idEntrada;
+                buyButton.dataset.ticketId = ticket.idTipoEntrada;
                 const buttonText = ticket.tipo.split(' ')[0];
                 buyButton.innerHTML = `<span>Comprar ${buttonText}</span>`;
-                buyButton.addEventListener('click', () => openPurchaseModal(ticket.idEntrada));
+                buyButton.addEventListener('click', () => openPurchaseModal(ticket.idTipoEntrada));
                 card.appendChild(buyButton);
             } else {
                 const agotadoMsg = document.createElement('p');
@@ -269,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function openPurchaseModal(ticketIdFromAPI) {
         console.log('[openPurchaseModal] ticketIdFromAPI:', ticketIdFromAPI, '(tipo:', typeof ticketIdFromAPI, ')');
         console.log('[openPurchaseModal] tiposDeEntradaGlobal al abrir modal:', JSON.parse(JSON.stringify(tiposDeEntradaGlobal)));
-        currentSelectedTicketType = tiposDeEntradaGlobal.find(t => t.idEntrada === Number(ticketIdFromAPI));
+        currentSelectedTicketType = tiposDeEntradaGlobal.find(t => t.idTipoEntrada === Number(ticketIdFromAPI));
         console.log('[openPurchaseModal] currentSelectedTicketType después de find:', JSON.parse(JSON.stringify(currentSelectedTicketType)));
 
         if (!currentSelectedTicketType || currentSelectedTicketType.stock <= 0) {
@@ -364,8 +364,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         console.log('[handleModalPurchaseSubmit] Iniciando envío. currentSelectedTicketType:', JSON.parse(JSON.stringify(currentSelectedTicketType)));
-        if (!currentSelectedTicketType || typeof currentSelectedTicketType.idEntrada === 'undefined') {
-            console.error('[handleModalPurchaseSubmit] ERROR FATAL: currentSelectedTicketType o su idEntrada no está definido antes de la compra.');
+        if (!currentSelectedTicketType || typeof currentSelectedTicketType.idTipoEntrada === 'undefined') {
+            console.error('[handleModalPurchaseSubmit] ERROR FATAL: currentSelectedTicketType o su idTipoEntrada no está definido antes de la compra.');
             modalCardErrors.textContent = 'Error interno: No se ha seleccionado un tipo de entrada válido para la compra.';
             if (modalPayButton.disabled) {
                 modalPayButton.disabled = false;
@@ -408,7 +408,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const payloadIniciarPago = {
-            idEntrada: currentSelectedTicketType.idEntrada,
+            idEntrada: currentSelectedTicketType.idTipoEntrada,
             cantidad: cantidad
         };
         console.log("[handleModalPurchaseSubmit] Payload para iniciar-pago (adaptado):", JSON.parse(JSON.stringify(payloadIniciarPago)));
@@ -456,7 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const formDataConfirmar = new URLSearchParams();
                 formDataConfirmar.append('paymentIntentId', paymentIntent.id);
                 formDataConfirmar.append('idFestival', FESTIVAL_ID.toString());
-                formDataConfirmar.append('idEntrada', currentSelectedTicketType.idEntrada.toString());
+                formDataConfirmar.append('idEntrada', currentSelectedTicketType.idTipoEntrada.toString());
                 formDataConfirmar.append('cantidad', cantidad.toString());
                 formDataConfirmar.append('emailComprador', emailComprador);
                 formDataConfirmar.append('nombreComprador', nombreComprador);

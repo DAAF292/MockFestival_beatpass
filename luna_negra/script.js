@@ -11,8 +11,8 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- Configuración LNF ---
-    const API_BASE_URL = 'https://daw2-tfg-beatpass.onrender.com/api'; // Mantener o ajustar si es necesario
-    //const API_BASE_URL = 'http://localhost:8080/BeatpassTFG/api'; // Para desarrollo local
+    //const API_BASE_URL = 'https://daw2-tfg-beatpass.onrender.com/api'; // Mantener o ajustar si es necesario
+    const API_BASE_URL = 'http://localhost:8080/BeatpassTFG/api'; // Para desarrollo local
     const FESTIVAL_ID = 19; // <<< CAMBIO PRINCIPAL: ID para Luna Negra Fest
     const CLAVE_PUBLICABLE_STRIPE = 'pk_test_51RLUyq4Et9Src69RTyKKrqn48wubA5QIbS9zTguw8chLB8FGgwMt9sZV6VwvT4UEWE0vnKxaJCNFlj87EY6i9mGK00ggcR1AiX'; // Mantener tu clave de Stripe
 
@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         tiposDeEntradaGlobalLNF.forEach((ticket, index) => {
-            if (!ticket || typeof ticket.idEntrada !== 'number' || typeof ticket.tipo !== 'string' || typeof ticket.precio !== 'number' || typeof ticket.stock !== 'number') {
+            if (!ticket || typeof ticket.idTipoEntrada !== 'number' || typeof ticket.tipo !== 'string' || typeof ticket.precio !== 'number' || typeof ticket.stock !== 'number') {
                 console.warn(`LNF: Saltando ticket [${index}] por datos incompletos:`, ticket);
                 return;
             }
@@ -207,9 +207,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (ticket.stock > 0) {
                 const buyButton = document.createElement('button');
                 buyButton.classList.add('cta-button-lnf', 'ticket-buy-action-lnf');
-                buyButton.dataset.ticketId = ticket.idEntrada;
+                buyButton.dataset.ticketId = ticket.idTipoEntrada;
                 buyButton.innerHTML = `<span>Forjar Pase</span>`;
-                buyButton.addEventListener('click', () => openLNFPurchaseModal(ticket.idEntrada));
+                buyButton.addEventListener('click', () => openLNFPurchaseModal(ticket.idTipoEntrada));
                 card.appendChild(buyButton);
             } else {
                 const agotadoMsg = document.createElement('p');
@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // == Lógica de Compra de Entradas LNF (Adaptada)
     // =========================================================================
     function openLNFPurchaseModal(ticketIdFromAPI) {
-        currentSelectedTicketType = tiposDeEntradaGlobalLNF.find(t => t.idEntrada === Number(ticketIdFromAPI));
+        currentSelectedTicketType = tiposDeEntradaGlobalLNF.find(t => t.idTipoEntrada === Number(ticketIdFromAPI));
 
         if (!currentSelectedTicketType || currentSelectedTicketType.stock <= 0) {
             alert("Este tipo de pase no está disponible o está agotado.");
@@ -320,7 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
             displayLNFError("Error en el sistema de forja. Inténtalo de nuevo.", true);
             return;
         }
-        if (!currentSelectedTicketType || typeof currentSelectedTicketType.idEntrada === 'undefined') {
+        if (!currentSelectedTicketType || typeof currentSelectedTicketType.idTipoEntrada === 'undefined') {
             if (modalCardErrors) modalCardErrors.textContent = 'Error interno: No se ha seleccionado un tipo de pase válido.';
             if (modalPayButton) { modalPayButton.disabled = false; updateLNFModalTotalPrice(); }
             return;
@@ -364,7 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
             modalPayButton.disabled = false; updateLNFModalTotalPrice(); return;
         }
 
-        const payloadIniciarPago = { idEntrada: currentSelectedTicketType.idEntrada, cantidad: cantidad };
+        const payloadIniciarPago = { idEntrada: currentSelectedTicketType.idTipoEntrada, cantidad: cantidad };
         try {
             const initResponse = await fetch(`${API_BASE_URL}/public/venta/iniciar-pago`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payloadIniciarPago)
@@ -383,7 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const formDataConfirmar = new URLSearchParams();
                 formDataConfirmar.append('paymentIntentId', paymentIntent.id);
                 formDataConfirmar.append('idFestival', FESTIVAL_ID.toString());
-                formDataConfirmar.append('idEntrada', currentSelectedTicketType.idEntrada.toString());
+                formDataConfirmar.append('idEntrada', currentSelectedTicketType.idTipoEntrada.toString());
                 formDataConfirmar.append('cantidad', cantidad.toString());
                 formDataConfirmar.append('emailComprador', emailComprador);
                 formDataConfirmar.append('nombreComprador', nombreComprador);
@@ -610,7 +610,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Solo cargar tipos de entrada si el festival está publicado
         if (festivalData && festivalData.estado === 'PUBLICADO') {
-            tiposDeEntradaGlobalLNF = await fetchLNFData(`/festivales/${FESTIVAL_ID}/entradas`);
+            tiposDeEntradaGlobalLNF = await fetchLNFData(`/festivales/${FESTIVAL_ID}/tipos-entrada`);
         } else {
             tiposDeEntradaGlobalLNF = []; // Vaciar si no está publicado
             if (ticketGridElement) ticketGridElement.innerHTML = '<p class="text-center col-span-full" style="grid-column: 1 / -1;">Los pases para esta edición aún no han sido liberados.</p>';
