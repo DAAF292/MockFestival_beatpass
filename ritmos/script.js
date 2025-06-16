@@ -13,8 +13,8 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- Configuración ---
-    //const API_BASE_URL = 'https://daw2-tfg-beatpass.onrender.com/api';
-    const API_BASE_URL = 'http://localhost:8080/BeatpassTFG/api'; // Para desarrollo local
+    const API_BASE_URL = 'https://daw2-tfg-beatpass.onrender.com/api';
+    //const API_BASE_URL = 'http://localhost:8080/BeatpassTFG/api'; // Para desarrollo local
     const FESTIVAL_ID = 20;
     const CLAVE_PUBLICABLE_STRIPE = 'pk_test_51RLUyq4Et9Src69RTyKKrqn48wubA5QIbS9zTguw8chLB8FGgwMt9sZV6VwvT4UEWE0vnKxaJCNFlj87EY6i9mGK00ggcR1AiX';
 
