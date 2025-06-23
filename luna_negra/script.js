@@ -11,8 +11,8 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- Configuración LNF ---
-    const API_BASE_URL = 'https://daw2-tfg-beatpass.onrender.com/api'; // Mantener o ajustar si es necesario
-    //const API_BASE_URL = 'http://localhost:8080/BeatpassTFG/api'; // Para desarrollo local
+    //const API_BASE_URL = 'https://daw2-tfg-beatpass.onrender.com/api'; // Mantener o ajustar si es necesario
+    const API_BASE_URL = 'http://localhost:8080/Beatpass/api'; // Para desarrollo local
     const FESTIVAL_ID = 19; // <<< CAMBIO PRINCIPAL: ID para Luna Negra Fest
     const CLAVE_PUBLICABLE_STRIPE = 'pk_test_51RLUyq4Et9Src69RTyKKrqn48wubA5QIbS9zTguw8chLB8FGgwMt9sZV6VwvT4UEWE0vnKxaJCNFlj87EY6i9mGK00ggcR1AiX'; // Mantener tu clave de Stripe
 
@@ -380,17 +380,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (stripeError) throw new Error(stripeError.message);
 
             if (paymentIntent && paymentIntent.status === 'succeeded') {
-                const formDataConfirmar = new URLSearchParams();
-                formDataConfirmar.append('paymentIntentId', paymentIntent.id);
-                formDataConfirmar.append('idFestival', FESTIVAL_ID.toString());
-                formDataConfirmar.append('idEntrada', currentSelectedTicketType.idTipoEntrada.toString());
-                formDataConfirmar.append('cantidad', cantidad.toString());
-                formDataConfirmar.append('emailComprador', emailComprador);
-                formDataConfirmar.append('nombreComprador', nombreComprador);
-                // idCompraTemporal no se usa aquí
+                const payloadConfirmar = {
+                    paymentIntentId: paymentIntent.id,
+                    idEntrada: currentSelectedTicketType.idTipoEntrada,
+                    cantidad: cantidad,
+                    emailComprador: emailComprador,
+                    nombreComprador: nombreComprador,
+                };
 
                 const confirmResponse = await fetch(`${API_BASE_URL}/public/venta/confirmar-compra`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formDataConfirmar
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payloadConfirmar)
                 });
                 if (!confirmResponse.ok) {
                     const errorText = await confirmResponse.text();

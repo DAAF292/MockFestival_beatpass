@@ -13,8 +13,8 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- Configuración ---
-    const API_BASE_URL = 'https://daw2-tfg-beatpass.onrender.com/api';
-    //const API_BASE_URL = 'http://localhost:8080/BeatpassTFG/api'; // Para desarrollo local
+    //const API_BASE_URL = 'https://daw2-tfg-beatpass.onrender.com/api';
+    const API_BASE_URL = 'http://localhost:8080/Beatpass/api'; // Para desarrollo local
     const FESTIVAL_ID = 20;
     const CLAVE_PUBLICABLE_STRIPE = 'pk_test_51RLUyq4Et9Src69RTyKKrqn48wubA5QIbS9zTguw8chLB8FGgwMt9sZV6VwvT4UEWE0vnKxaJCNFlj87EY6i9mGK00ggcR1AiX';
 
@@ -453,29 +453,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (paymentIntent && paymentIntent.status === 'succeeded') {
 
-                const formDataConfirmar = new URLSearchParams();
-                formDataConfirmar.append('paymentIntentId', paymentIntent.id);
-                formDataConfirmar.append('idFestival', FESTIVAL_ID.toString());
-                formDataConfirmar.append('idEntrada', currentSelectedTicketType.idTipoEntrada.toString());
-                formDataConfirmar.append('cantidad', cantidad.toString());
-                formDataConfirmar.append('emailComprador', emailComprador);
-                formDataConfirmar.append('nombreComprador', nombreComprador);
+                const payloadConfirmar = {
+                    paymentIntentId: paymentIntent.id,
+                    // idFestival: FESTIVAL_ID, // ¡ELIMINA ESTA LÍNEA! No es esperada por el DTO del backend.
+                    idEntrada: currentSelectedTicketType.idTipoEntrada, // Ya es un número, no necesita .toString()
+                    cantidad: cantidad, // Ya es un número
+                    emailComprador: emailComprador,
+                    nombreComprador: nombreComprador,
+                    // Si tienes un campo de teléfono en tu HTML (como modalBuyerPhoneInput.value.trim()), añádelo aquí
+                    // telefonoComprador: modalBuyerPhoneInput.value.trim() || null
+                };
 
-                if (currentIdCompraTemporal) {
-                    formDataConfirmar.append('idCompraTemporal', currentIdCompraTemporal);
-                } else {
-                    console.warn("[handleModalPurchaseSubmit] idCompraTemporal es '" + currentIdCompraTemporal + "' y no se está incluyendo en el payload de confirmar-compra para /public/venta/confirmar-compra."); // Línea ~473
-                }
+                console.log("[handleModalPurchaseSubmit] Payload (JSON) para confirmar-compra (CORREGIDO):", JSON.stringify(payloadConfirmar, null, 2));
 
-                console.log("[handleModalPurchaseSubmit] Payload (URLSearchParams) para confirmar-compra (CORREGIDO):", formDataConfirmar.toString()); // Línea ~476
-
-                const confirmResponse = await fetch(`${API_BASE_URL}/public/venta/confirmar-compra`, { // Línea ~479 (antes 454)
+                const confirmResponse = await fetch(`${API_BASE_URL}/public/venta/confirmar-compra`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Content-Type': 'application/json', // <--- ¡CLAVE! CAMBIAR A application/json
                     },
-                    body: formDataConfirmar
+                    body: JSON.stringify(payloadConfirmar) // <--- ¡CLAVE! Convertir el objeto a JSON
                 });
+
+                console.log("[handleModalPurchaseSubmit] Respuesta cruda de confirmar-compra:", confirmResponse);
+
 
                 console.log("[handleModalPurchaseSubmit] Respuesta cruda de confirmar-compra:", confirmResponse); // Línea ~485 (antes 462)
 
