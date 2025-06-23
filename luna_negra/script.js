@@ -11,10 +11,10 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- Configuración LNF ---
-    //const API_BASE_URL = 'https://daw2-tfg-beatpass.onrender.com/api'; // Mantener o ajustar si es necesario
-    const API_BASE_URL = 'http://localhost:8080/Beatpass/api'; // Para desarrollo local
-    const FESTIVAL_ID = 19; // <<< CAMBIO PRINCIPAL: ID para Luna Negra Fest
-    const CLAVE_PUBLICABLE_STRIPE = 'pk_test_51RLUyq4Et9Src69RTyKKrqn48wubA5QIbS9zTguw8chLB8FGgwMt9sZV6VwvT4UEWE0vnKxaJCNFlj87EY6i9mGK00ggcR1AiX'; // Mantener tu clave de Stripe
+    const API_BASE_URL = 'https://beatpass.onrender.com/api'; 
+    //const API_BASE_URL = 'http://localhost:8080/Beatpass/api'; // Para desarrollo local
+    const FESTIVAL_ID = 19; // <<< ID para Luna Negra Fest
+    const CLAVE_PUBLICABLE_STRIPE = 'pk_test_51RLUyq4Et9Src69RTyKKrqn48wubA5QIbS9zTguw8chLB8FGgwMt9sZV6VwvT4UEWE0vnKxaJCNFlj87EY6i9mGK00ggcR1AiX'; 
 
     // --- Selectores DOM Globales LNF (adaptados con -lnf) ---
     const body = document.body;
